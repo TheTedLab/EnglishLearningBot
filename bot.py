@@ -13,22 +13,24 @@ from telegram.ext import (
     MessageFilter,
 )
 
-# Enable logging
+# Логирование в консоль
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
 )
-
 logger = logging.getLogger(__name__)
 
+# UTF-8 коды для эмодзи
 hand_emoji = u'\U0001F44B'
 check_mark = u'\U00002705'
 cross_mark = u'\U0000274C'
 right_triangle = u'\U000025B6'
 
-ACTION, RECORD_LEVEL_ONE, RECORD_LEVEL_TWO, TIME_SIGN, INFO, SERVICES, \
-    LEVEL_KNOWLEDGE, LEVEL_LANGUAGE = range(8)
+# Перечисление состояний разговора
+ACTION, RECORD, TIME_SIGN, INFO, SERVICES, LEVEL_KNOWLEDGE,\
+    LEVEL_LANGUAGE, TEACHER_INFO = range(8)
 
 
+# Фильтры текста
 class FilterRecord(MessageFilter):
     def filter(self, message):
         return 'Запись на занятие' in message.text
@@ -67,6 +69,7 @@ filter_yes = FilterYes()
 filter_no = FilterNo()
 
 
+# Функция стандартного текста команд
 def commands_text() -> str:
     return 'Что ты хочешь сделать?\n' \
            + check_mark + 'Напиши \"*Запись на занятие*\" - чтобы записаться на курсы к преподавателю\n' \
@@ -75,6 +78,7 @@ def commands_text() -> str:
            + check_mark + 'Напиши \"*Узнать уровень*\" - чтобы узнать свой уровень английского языка\n'
 
 
+# Функция вывода текста команд
 def commands_helper(update: Update, context: CallbackContext) -> None:
     unknown_response(update, context)
     update.message.reply_text(
@@ -83,6 +87,7 @@ def commands_helper(update: Update, context: CallbackContext) -> None:
     )
 
 
+# Стартовая функция - команда /start
 def start(update: Update, context: CallbackContext) -> int:
     """Select an action: Record, Info, Services or Level."""
     user = update.effective_user
@@ -98,11 +103,12 @@ def start(update: Update, context: CallbackContext) -> int:
     return ACTION
 
 
+# Класс функций и dispatcher состояний ACTION
 class ActionFunctions:
     def record_func(self, update: Update, context: CallbackContext) -> int:
         update.message.reply_text("Вы хотите записаться к конкретному преподавателю?")
 
-        return RECORD_LEVEL_ONE
+        return RECORD
 
     def info_func(self, update: Update, context: CallbackContext) -> int:
         update.message.reply_text(
@@ -137,6 +143,7 @@ class ActionFunctions:
         return method(update, context)
 
 
+# Switch для ACTION ответов
 def actions_switcher(action) -> str:
     switcher = {
         "Запись на занятие": "record_func",
@@ -148,16 +155,18 @@ def actions_switcher(action) -> str:
     return switcher.get(action, "no_such_action")
 
 
-def action_func(update: Update, context: CallbackContext) -> str:
+# Функция ACTION состояния
+def action_func(update: Update, context: CallbackContext) -> int:
     user = update.message.from_user.full_name
     text = update.message.text
     logger.info("<%s> chose action: \"%s\"", user, text)
-    # Call action function
+    # Вызов ACTION dispatcher
     bot_action_functions = ActionFunctions()
 
     return bot_action_functions.actions_dispatcher(text, update, context)
 
 
+# Класс функций и dispatcher состояний RECORD
 class RecordFunctions:
     def teacher_sign_func(self, update: Update, context: CallbackContext) -> int:
         update.message.reply_text("На какое время?")
@@ -180,6 +189,7 @@ class RecordFunctions:
         return method(update, context)
 
 
+# Switch для RECORD ответов
 def record_switcher(action) -> str:
     switcher = {
         "Да": "teacher_sign_func",
@@ -189,29 +199,77 @@ def record_switcher(action) -> str:
     return switcher.get(action, "no_such_record")
 
 
-def record_with_teacher(update: Update, context: CallbackContext) -> None:
+# Функция RECORD состояния
+def record_with_teacher(update: Update, context: CallbackContext) -> int:
     user = update.message.from_user.full_name
     text = update.message.text
     logger.info("<%s> chose to record with teacher: \"%s\"", user, text)
-    # Call second level record function
+    # Вызов RECORD dispatcher
     bot_record_functions = RecordFunctions()
 
     return bot_record_functions.record_dispatcher(text, update, context)
 
 
-def teacher_time_func(update: Update, context: CallbackContext) -> str:
+# Функция TIME_SIGN состояния - время записи к преподавателю
+def teacher_time_func(update: Update, context: CallbackContext) -> int:
     user = update.message.from_user.full_name
     text = update.message.text
     logger.info("<%s> chose time: \"%s\"", user, text)
     update.message.reply_text(
         fr'Вы успешно записались к преподавателю на время {text}!'
     )
-    # Call teacher info function
-    print('call teacher info function')
+    update.message.reply_text(
+        "Вы хотите получить информацию о преподавателе?"
+    )
 
-    return ACTION
+    return TEACHER_INFO
 
 
+# Класс функций и dispatcher состояний TEACHER_INFO
+class TeacherInfoDispatch:
+    def teacher_about_func(self, update: Update, context: CallbackContext) -> int:
+        update.message.reply_text("Преподаватель!")
+
+        return ACTION
+
+    def no_about_func(self, update: Update, context: CallbackContext) -> int:
+        update.message.reply_text("Ок. Тогда попробуйте другие функции!")
+
+        return ACTION
+
+    def no_such_info(self, update: Update, context: CallbackContext) -> int:
+        unknown_response(update, context)
+
+        return ACTION
+
+    def teacher_info_dispatcher(self, choice, update, context):
+        method = getattr(self, teacher_info_switcher(choice))
+
+        return method(update, context)
+
+
+# Switch для TEACHER_INFO ответов
+def teacher_info_switcher(choice) -> str:
+    switcher = {
+        "Да": "teacher_about_func",
+        "Нет": "no_about_func"
+    }
+
+    return switcher.get(choice, "no_such_info")
+
+
+# Функция TEACHER_INFO состояния - информация о преподавателе
+def teacher_info_func(update: Update, context: CallbackContext) -> int:
+    user = update.message.from_user.full_name
+    text = update.message.text
+    logger.info("<%s> chose to get information about the teacher: %s", user, text)
+    # Вызов TEACHER_INFO dispatcher
+    bot_teacher_info = TeacherInfoDispatch()
+
+    return bot_teacher_info.teacher_info_dispatcher(text, update, context)
+
+
+# Класс функций и dispatcher состояний LEVEL_KNOWLEDGE и LEVEL_LANGUAGE
 class LevelDispatch:
     def provide_teacher_func(self, update: Update, context: CallbackContext) -> int:
         update.message.reply_text(
@@ -250,7 +308,8 @@ class LevelDispatch:
         return method(update, context)
 
 
-def knowledge_switcher(choice):
+# Switch для LEVEL_KNOWLEDGE ответов
+def knowledge_switcher(choice) -> str:
     switcher = {
         "Да": "provide_teacher_func",
         "Нет": "link_func"
@@ -259,7 +318,8 @@ def knowledge_switcher(choice):
     return switcher.get(choice, "no_such_language")
 
 
-def language_switcher(choice):
+# Switch для LEVEL_LANGUAGE ответов
+def language_switcher(choice) -> str:
     switcher = {
         "Да": "link_func",
         "Нет": "know_level_func"
@@ -268,35 +328,45 @@ def language_switcher(choice):
     return switcher.get(choice, "no_such_language")
 
 
-def level_knowledge_func(update: Update, context: CallbackContext) -> str:
+# Функция LEVEL_KNOWLEDGE состояния - знание об уровне после RECORD
+def level_knowledge_func(update: Update, context: CallbackContext) -> int:
     user = update.message.from_user.full_name
     text = update.message.text
     logger.info("<%s> knows English level: \"%s\"", user, text)
-    # Call language level dispatcher
+    # Вызов LEVEL_KNOWLEDGE dispatcher
     bot_knowledge_dispatch = LevelDispatch()
 
     return bot_knowledge_dispatch.knowledge_dispatcher(text, update, context)
 
 
-def level_language_func(update: Update, context: CallbackContext) -> str:
+# Функция LEVEL_LANGUAGE состояния - команда "Узнать уровень"
+def level_language_func(update: Update, context: CallbackContext) -> int:
     user = update.message.from_user.full_name
     text = update.message.text
     logger.info("<%s> want to know English level: \"%s\"", user, text)
-    # Call language level dispatcher
+    # Вызов LEVEL_LANGUAGE dispatcher
     bot_language_dispatch = LevelDispatch()
 
     return bot_language_dispatch.language_dispatcher(text, update, context)
 
 
+# Команда /help
 def help_command(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /help is issued."""
-    update.message.reply_text('Help!')
+    user = update.message.from_user.full_name
+    logger.info("<%s> requested /help command.", user)
+    update.message.reply_text('Помощь:')
+    update.message.reply_text(
+        commands_text(),
+        parse_mode=telegram.ParseMode.MARKDOWN
+    )
 
 
+# Команда отмены разговора
 def cancel(update: Update, context: CallbackContext) -> int:
     """Cancels and ends the conversation."""
-    user = update.message.from_user
-    logger.info("<%s> canceled the conversation.", user.full_name)
+    user = update.message.from_user.full_name
+    logger.info("<%s> canceled the conversation.", user)
     update.message.reply_text(
         'Ок! Разговор отменен.',
     )
@@ -304,25 +374,28 @@ def cancel(update: Update, context: CallbackContext) -> int:
     return ConversationHandler.END
 
 
+# Неизвестный запрос или команда
 def unknown_response(update: Update, context: CallbackContext) -> None:
     """Reply to an unknown command."""
     user = update.message.from_user.full_name
     text = update.message.text
     logger.info("<%s> entered unknown command: %s", user, text)
     update.message.reply_text(
-        'Извините, я вас не понял.'
+        'Извините, команда не распознана.'
     )
 
 
+# Любые запросы и команды до начала разговора /start
 def no_start_command(update: Update, context: CallbackContext) -> None:
-    """Reply to write start command."""
-    # Call unknown response, then send to start
+    """Reply to enter start command."""
+    # Вызов unknown_response, затем требование команды /start
     unknown_response(update, context)
     update.message.reply_text(
         'Чтобы начать разговор напишите /start.'
     )
 
 
+# Повторные вызовы /start после начала разговора
 def already_start_func(update: Update, context: CallbackContext) -> None:
     """Reply that the conversation has already started."""
     user = update.message.from_user.full_name
@@ -332,9 +405,23 @@ def already_start_func(update: Update, context: CallbackContext) -> None:
     )
 
 
+# Вызов /cancel до начала разговора
+def not_started_conversation(update: Update, context: CallbackContext) -> None:
+    """Reply that the conversation has not started yet."""
+    user = update.message.from_user.full_name
+    logger.info("<%s> tried the command /cancel before beginning.", user)
+    update.message.reply_text(
+        'Разговор еще не начат!'
+    )
+    update.message.reply_text(
+        'Чтобы начать разговор напишите /start.'
+    )
+
+
+# Неизвестный запрос или команда при вопросе "Да или Нет"
 def unknown_response_yes_no(update: Update, context: CallbackContext) -> None:
     """Reply to write yes or no."""
-    # Call unknown response, then send to yes or no
+    # Вызов unknown_response, затем требование "Да или Нет"
     unknown_response(update, context)
     update.message.reply_text(
         'Ответьте на вопрос \"*Да*\" ' + check_mark +
@@ -343,42 +430,74 @@ def unknown_response_yes_no(update: Update, context: CallbackContext) -> None:
     )
 
 
+# Обработка голосовых сообщений - Доработка:
+# 1. Посылает в голосовой преобразователь -> Далее в нейросеть
+# 2. Принимает из нейросети -> Прогон по фильтрам
+# 3. Возвращает боту
+def voice_func(update: Update, context: CallbackContext) -> None:
+    """Reply that received a voice message."""
+    user = update.message.from_user.full_name
+    voice = update.message.voice
+    logger.info("<%s> entered voice message. Duration: %s, Size: %s",
+                user, voice.duration, voice.file_size)
+    update.message.reply_text(
+        "Вы ввели голосовое сообщение.\nПоддержка голосовых сообщений в разработке..."
+    )
+    print('Get voice message')
+
+
 def main() -> None:
     """Start the bot."""
-    # Create the Updater and pass it with token
+    # Создание Updater и связывание с токеном бота
     updater = Updater(token)
 
-    # Get the dispatcher to register handlers
+    # Получение dispatcher и регистрация handlers
     dispatcher = updater.dispatcher
 
-    # Add conversation handler with the states
+    # Добавление conversation handler с состояниями разговора
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
         states={
             ACTION: [
+                MessageHandler(Filters.voice, voice_func),
                 MessageHandler(filter_record | filter_info | filter_services | filter_level,
                                action_func),
-                MessageHandler(Filters.text & ~Filters.command &
-                               ~filter_record & ~filter_info &
-                               ~filter_services & ~filter_level &
-                               ~filter_yes & ~filter_no, commands_helper),
+                MessageHandler(Filters.text & ~Filters.command |
+                               filter_yes | filter_no, commands_helper),
                 CommandHandler('start', already_start_func)
             ],
-            RECORD_LEVEL_ONE: [
+            RECORD: [
+                MessageHandler(Filters.voice, voice_func),
                 MessageHandler(filter_yes | filter_no, record_with_teacher),
                 MessageHandler(Filters.text & ~Filters.command &
-                               ~filter_yes & ~filter_no, unknown_response_yes_no)
+                               ~filter_yes & ~filter_no, unknown_response_yes_no),
+                CommandHandler('start', already_start_func)
             ],
-            TIME_SIGN: [MessageHandler(Filters.text, teacher_time_func)],
+            TIME_SIGN: [
+                MessageHandler(Filters.voice, voice_func),
+                MessageHandler(Filters.text, teacher_time_func),
+                CommandHandler('start', already_start_func)
+            ],
             LEVEL_KNOWLEDGE: [
+                MessageHandler(Filters.voice, voice_func),
                 MessageHandler(filter_yes | filter_no, level_knowledge_func),
                 MessageHandler(Filters.text & ~Filters.command &
-                               ~filter_yes & ~filter_no, unknown_response_yes_no)
+                               ~filter_yes & ~filter_no, unknown_response_yes_no),
+                CommandHandler('start', already_start_func)
             ],
             LEVEL_LANGUAGE: [
+                MessageHandler(Filters.voice, voice_func),
                 MessageHandler(filter_yes | filter_no, level_language_func),
                 MessageHandler(Filters.text & ~Filters.command &
-                               ~filter_yes & ~filter_no, unknown_response_yes_no)
+                               ~filter_yes & ~filter_no, unknown_response_yes_no),
+                CommandHandler('start', already_start_func)
+            ],
+            TEACHER_INFO: [
+                MessageHandler(Filters.voice, voice_func),
+                MessageHandler(filter_yes | filter_no, teacher_info_func),
+                MessageHandler(Filters.text & ~Filters.command &
+                               ~filter_yes & ~filter_no, unknown_response_yes_no),
+                CommandHandler('start', already_start_func)
             ]
         },
         fallbacks=[CommandHandler('cancel', cancel)],
@@ -386,16 +505,20 @@ def main() -> None:
 
     dispatcher.add_handler(conv_handler)
 
-    # on different commands - answer in Telegram
+    # Регистрация команд - ответы в Telegram
     dispatcher.add_handler(CommandHandler("help", help_command))
+    dispatcher.add_handler(CommandHandler("cancel", not_started_conversation))
 
-    # on non command and control message - send unknown response on Telegram
+    # Любые сообщения и команды до начала разговора - ответ нет /start команды
     dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, no_start_command))
 
-    # Start the Bot
+    # Голосовое сообщение до начала разговора
+    dispatcher.add_handler(MessageHandler(Filters.voice, voice_func))
+
+    # Старт бота
     updater.start_polling()
 
-    # Run the bot until Ctrl-C pressed or the process receives stop.
+    # Бот работает до прерывания Ctrl-C или получения stop команды
     updater.idle()
 
 
