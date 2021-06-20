@@ -26,8 +26,8 @@ cross_mark = u'\U0000274C'
 right_triangle = u'\U000025B6'
 
 # Перечисление состояний разговора
-ACTION, RECORD, TIME_SIGN, INFO, SERVICES, LEVEL_KNOWLEDGE,\
-    LEVEL_LANGUAGE, TEACHER_INFO = range(8)
+ACTION, RECORD, TIME_SIGN, INFO, SERVICES, SERVICE_SELECTION, LEVEL_KNOWLEDGE, \
+    LEVEL_LANGUAGE, TEACHER_INFO = range(9)
 
 
 # Фильтры текста
@@ -61,12 +61,36 @@ class FilterNo(MessageFilter):
         return 'Нет' in message.text
 
 
+class FilterDigitOne(MessageFilter):
+    def filter(self, message):
+        return '1' in message.text
+
+
+class FilterDigitTwo(MessageFilter):
+    def filter(self, message):
+        return '2' in message.text
+
+
+class FilterDigitThree(MessageFilter):
+    def filter(self, message):
+        return '3' in message.text
+
+
+class FilterDigitFour(MessageFilter):
+    def filter(self, message):
+        return '4' in message.text
+
+
 filter_record = FilterRecord()
 filter_info = FilterInfo()
 filter_services = FilterServices()
 filter_level = FilterLevel()
 filter_yes = FilterYes()
 filter_no = FilterNo()
+filter_digit_one = FilterDigitOne()
+filter_digit_two = FilterDigitTwo()
+filter_digit_three = FilterDigitThree()
+filter_digit_four = FilterDigitFour()
 
 
 # Функция стандартного текста команд
@@ -125,8 +149,11 @@ class ActionFunctions:
             right_triangle + "3. IELTS (Любой экзамен)\n" +
             right_triangle + "4. Для себя\n"
         )
+        update.message.reply_text(
+            'Вы хотите воспользоваться какой-либо услугой?'
+        )
 
-        return ACTION
+        return SERVICES
 
     def level_func(self, update: Update, context: CallbackContext) -> int:
         update.message.reply_text("Вы хотите узнать свой уровень английского языка?")
@@ -210,6 +237,127 @@ def record_with_teacher(update: Update, context: CallbackContext) -> int:
     return bot_record_functions.record_dispatcher(text, update, context)
 
 
+# Класс функций и dispatcher состояний SERVICES
+class ServicesDispatch:
+    def services_info(self, update: Update, context: CallbackContext) -> str:
+        update.message.reply_text("Какой? (Укажите номер)")
+
+        return SERVICE_SELECTION
+
+    def no_about_services(self, update: Update, context: CallbackContext) -> str:
+        update.message.reply_text("Ок. Тогда попробуйте другие функции!")
+
+        return ACTION
+
+    def no_such_services(self, update: Update, context: CallbackContext) -> str:
+        unknown_response(update, context)
+
+        return ACTION
+
+    def services_dispatcher(self, choice, update, context):
+        method = getattr(self, services_switcher(choice))
+
+        return method(update, context)
+
+
+# Switch для SERVICES ответов
+def services_switcher(choice) -> str:
+    switcher = {
+        "Да": "services_info",
+        "Нет": "no_about_services"
+    }
+
+    return switcher.get(choice, "no_such_services")
+
+
+# Функция SERVICES состояния
+def services_func(update: Update, context: CallbackContext) -> int:
+    user = update.message.from_user.full_name
+    text = update.message.text
+    logger.info("<%s> chose to get services info: \"%s\"", user, text)
+    # Вызов SERVICES dispatcher
+    bot_services_info = ServicesDispatch()
+
+    return bot_services_info.services_dispatcher(text, update, context)
+
+
+# Класс функций и dispatcher состояний SERVICE_SELECTION
+class ServiceSelection:
+    def first_service(self, update: Update, context: CallbackContext) -> str:
+        update.message.reply_text(
+            'Вы выбрали услугу подготовки к *ОГЭ (ГИА)*.',
+            parse_mode=telegram.ParseMode.MARKDOWN
+        )
+
+        return service_action_question(update, context)
+
+    def second_service(self, update: Update, context: CallbackContext) -> str:
+        update.message.reply_text(
+            'Вы выбрали услугу подготовки к *ЕГЭ*.',
+            parse_mode=telegram.ParseMode.MARKDOWN
+        )
+
+        return service_action_question(update, context)
+
+    def third_service(self, update: Update, context: CallbackContext) -> str:
+        update.message.reply_text(
+            'Вы выбрали услугу подготовки к *IELTS (Любой экзамен)*.',
+            parse_mode=telegram.ParseMode.MARKDOWN
+        )
+
+        return service_action_question(update, context)
+
+    def fourth_service(self, update: Update, context: CallbackContext) -> str:
+        update.message.reply_text(
+            'Вы выбрали услугу подготовки \"*Для себя*\".',
+            parse_mode=telegram.ParseMode.MARKDOWN
+        )
+
+        return service_action_question(update, context)
+
+    def no_such_selection(self, update: Update, context: CallbackContext) -> str:
+        unknown_response(update, context)
+
+        return ACTION
+
+    def selection_dispatcher(self, choice, update: Update, context: CallbackContext):
+        method = getattr(self, service_selection_switcher(choice))
+
+        return method(update, context)
+
+
+# Switch для SERVICE_SELECTION ответов
+def service_selection_switcher(choice) -> str:
+    switcher = {
+        "1": "first_service",
+        "2": "second_service",
+        "3": "third_service",
+        "4": "fourth_service"
+    }
+
+    return switcher.get(choice, "no_such_selection")
+
+
+# Функция SERVICE_SELECTION состояния
+def service_selection_func(update: Update, context: CallbackContext) -> int:
+    user = update.message.from_user.full_name
+    text = update.message.text
+    logger.info("<%s> chose to get %s service.", user, text)
+    # Вызов SERVICE_SELECTION dispatcher
+    bot_selection_service = ServiceSelection()
+
+    return bot_selection_service.selection_dispatcher(text, update, context)
+
+
+# Вопрос о записи к преподавателю
+def service_action_question(update: Update, context: CallbackContext) -> str:
+    update.message.reply_text(
+        'Вы хотите записаться к конкретному преподавателю?'
+    )
+
+    return RECORD
+
+
 # Функция TIME_SIGN состояния - время записи к преподавателю
 def teacher_time_func(update: Update, context: CallbackContext) -> int:
     user = update.message.from_user.full_name
@@ -280,7 +428,10 @@ class LevelDispatch:
 
     def link_func(self, update: Update, context: CallbackContext) -> int:
         update.message.reply_text(
-            'Вот ссылка на тест!'
+            'Вот ссылка на тест: '
+            '<a href="https://www.cambridgeenglish.org/test-your-english/general-english/">'
+            'Cambridge Level Test</a>',
+            parse_mode=telegram.ParseMode.HTML,
         )
 
         return ACTION
@@ -420,12 +571,23 @@ def not_started_conversation(update: Update, context: CallbackContext) -> None:
 
 # Неизвестный запрос или команда при вопросе "Да или Нет"
 def unknown_response_yes_no(update: Update, context: CallbackContext) -> None:
-    """Reply to write yes or no."""
+    """Reply to enter yes or no."""
     # Вызов unknown_response, затем требование "Да или Нет"
     unknown_response(update, context)
     update.message.reply_text(
         'Ответьте на вопрос \"*Да*\" ' + check_mark +
         ' или \"*Нет*\" ' + cross_mark,
+        parse_mode=telegram.ParseMode.MARKDOWN
+    )
+
+
+# Неизвестный запрос или команда при вопросе с цифрами
+def unknown_response_digit(update: Update, context: CallbackContext) -> None:
+    """Reply to enter digit"""
+    # Вызов unknown_response, затем требование цифры
+    unknown_response(update, context)
+    update.message.reply_text(
+        'Ответьте на вопрос \'*1*\', \'*2*\', \'*3*\' или \'*4*\'',
         parse_mode=telegram.ParseMode.MARKDOWN
     )
 
@@ -469,8 +631,20 @@ def main() -> None:
             RECORD: [
                 MessageHandler(Filters.voice, voice_func),
                 MessageHandler(filter_yes | filter_no, record_with_teacher),
-                MessageHandler(Filters.text & ~Filters.command &
-                               ~filter_yes & ~filter_no, unknown_response_yes_no),
+                MessageHandler(Filters.text & ~Filters.command, unknown_response_yes_no),
+                CommandHandler('start', already_start_func)
+            ],
+            SERVICES: [
+                MessageHandler(Filters.voice, voice_func),
+                MessageHandler(filter_yes | filter_no, services_func),
+                MessageHandler(Filters.text & ~Filters.command, unknown_response_yes_no),
+                CommandHandler('start', already_start_func)
+            ],
+            SERVICE_SELECTION: [
+                MessageHandler(Filters.voice, voice_func),
+                MessageHandler(filter_digit_one | filter_digit_two | filter_digit_three |
+                               filter_digit_four, service_selection_func),
+                MessageHandler(Filters.text & ~Filters.command, unknown_response_digit),
                 CommandHandler('start', already_start_func)
             ],
             TIME_SIGN: [
@@ -481,22 +655,19 @@ def main() -> None:
             LEVEL_KNOWLEDGE: [
                 MessageHandler(Filters.voice, voice_func),
                 MessageHandler(filter_yes | filter_no, level_knowledge_func),
-                MessageHandler(Filters.text & ~Filters.command &
-                               ~filter_yes & ~filter_no, unknown_response_yes_no),
+                MessageHandler(Filters.text & ~Filters.command, unknown_response_yes_no),
                 CommandHandler('start', already_start_func)
             ],
             LEVEL_LANGUAGE: [
                 MessageHandler(Filters.voice, voice_func),
                 MessageHandler(filter_yes | filter_no, level_language_func),
-                MessageHandler(Filters.text & ~Filters.command &
-                               ~filter_yes & ~filter_no, unknown_response_yes_no),
+                MessageHandler(Filters.text & ~Filters.command, unknown_response_yes_no),
                 CommandHandler('start', already_start_func)
             ],
             TEACHER_INFO: [
                 MessageHandler(Filters.voice, voice_func),
                 MessageHandler(filter_yes | filter_no, teacher_info_func),
-                MessageHandler(Filters.text & ~Filters.command &
-                               ~filter_yes & ~filter_no, unknown_response_yes_no),
+                MessageHandler(Filters.text & ~Filters.command, unknown_response_yes_no),
                 CommandHandler('start', already_start_func)
             ]
         },
