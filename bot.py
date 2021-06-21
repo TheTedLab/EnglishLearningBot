@@ -1,4 +1,6 @@
 import logging
+import random
+
 import telegram
 
 from authorization import token
@@ -196,7 +198,26 @@ def action_func(update: Update, context: CallbackContext) -> int:
 # Класс функций и dispatcher состояний RECORD
 class RecordFunctions:
     def teacher_sign_func(self, update: Update, context: CallbackContext) -> int:
-        update.message.reply_text("На какое время?")
+        first_time = random_hour(6, 19)
+        second_time = random_hour(7, 20)
+        third_time = random_hour(8, 21)
+
+        while second_time <= first_time:
+            second_time = random_hour(7, 20)
+
+        while third_time <= second_time:
+            third_time = random_hour(8, 21)
+
+        update.message.reply_text("На какое время? (Укажите номер)")
+        update.message.reply_text(
+            right_triangle + '1. *' + first_time + '*\n' +
+            right_triangle + '2. *' + second_time + '*\n' +
+            right_triangle + '3. *' + third_time + '*\n',
+            parse_mode=telegram.ParseMode.MARKDOWN
+        )
+        context.user_data['1'] = first_time
+        context.user_data['2'] = second_time
+        context.user_data['3'] = third_time
 
         return TIME_SIGN
 
@@ -237,19 +258,30 @@ def record_with_teacher(update: Update, context: CallbackContext) -> int:
     return bot_record_functions.record_dispatcher(text, update, context)
 
 
+def random_hour(begin, end) -> str:
+    str_hour = ""
+    hour = random.randint(begin, end)
+    if hour < 10:
+        str_hour += "0"
+
+    str_hour += str(hour) + ":00"
+
+    return str_hour
+
+
 # Класс функций и dispatcher состояний SERVICES
 class ServicesDispatch:
-    def services_info(self, update: Update, context: CallbackContext) -> str:
+    def services_info(self, update: Update, context: CallbackContext) -> int:
         update.message.reply_text("Какой? (Укажите номер)")
 
         return SERVICE_SELECTION
 
-    def no_about_services(self, update: Update, context: CallbackContext) -> str:
+    def no_about_services(self, update: Update, context: CallbackContext) -> int:
         update.message.reply_text("Ок. Тогда попробуйте другие функции!")
 
         return ACTION
 
-    def no_such_services(self, update: Update, context: CallbackContext) -> str:
+    def no_such_services(self, update: Update, context: CallbackContext) -> int:
         unknown_response(update, context)
 
         return ACTION
@@ -283,7 +315,7 @@ def services_func(update: Update, context: CallbackContext) -> int:
 
 # Класс функций и dispatcher состояний SERVICE_SELECTION
 class ServiceSelection:
-    def first_service(self, update: Update, context: CallbackContext) -> str:
+    def first_service(self, update: Update, context: CallbackContext) -> int:
         update.message.reply_text(
             'Вы выбрали услугу подготовки к *ОГЭ (ГИА)*.',
             parse_mode=telegram.ParseMode.MARKDOWN
@@ -291,7 +323,7 @@ class ServiceSelection:
 
         return service_action_question(update, context)
 
-    def second_service(self, update: Update, context: CallbackContext) -> str:
+    def second_service(self, update: Update, context: CallbackContext) -> int:
         update.message.reply_text(
             'Вы выбрали услугу подготовки к *ЕГЭ*.',
             parse_mode=telegram.ParseMode.MARKDOWN
@@ -299,7 +331,7 @@ class ServiceSelection:
 
         return service_action_question(update, context)
 
-    def third_service(self, update: Update, context: CallbackContext) -> str:
+    def third_service(self, update: Update, context: CallbackContext) -> int:
         update.message.reply_text(
             'Вы выбрали услугу подготовки к *IELTS (Любой экзамен)*.',
             parse_mode=telegram.ParseMode.MARKDOWN
@@ -307,7 +339,7 @@ class ServiceSelection:
 
         return service_action_question(update, context)
 
-    def fourth_service(self, update: Update, context: CallbackContext) -> str:
+    def fourth_service(self, update: Update, context: CallbackContext) -> int:
         update.message.reply_text(
             'Вы выбрали услугу подготовки \"*Для себя*\".',
             parse_mode=telegram.ParseMode.MARKDOWN
@@ -315,7 +347,7 @@ class ServiceSelection:
 
         return service_action_question(update, context)
 
-    def no_such_selection(self, update: Update, context: CallbackContext) -> str:
+    def no_such_selection(self, update: Update, context: CallbackContext) -> int:
         unknown_response(update, context)
 
         return ACTION
@@ -350,7 +382,7 @@ def service_selection_func(update: Update, context: CallbackContext) -> int:
 
 
 # Вопрос о записи к преподавателю
-def service_action_question(update: Update, context: CallbackContext) -> str:
+def service_action_question(update: Update, context: CallbackContext) -> int:
     update.message.reply_text(
         'Вы хотите записаться к конкретному преподавателю?'
     )
@@ -358,19 +390,68 @@ def service_action_question(update: Update, context: CallbackContext) -> str:
     return RECORD
 
 
+# Класс функций и dispatcher состояний TIME_SIGN
+class TimeDispatch:
+    def first_time(self, update: Update, context: CallbackContext) -> int:
+        # Если запрос первого времени - очистка второго и третьего
+        context.user_data['2'] = ""
+        context.user_data['3'] = ""
+
+        return TEACHER_INFO
+
+    def second_time(self, update: Update, context: CallbackContext) -> int:
+        # Если запрос второго времени - очистка первого и третьего
+        context.user_data['1'] = ""
+        context.user_data['3'] = ""
+
+        return TEACHER_INFO
+
+    def third_time(self, update: Update, context: CallbackContext) -> int:
+        # Если запрос третьего времени - очистка первого и второго
+        context.user_data['2'] = ""
+        context.user_data['3'] = ""
+
+        return TEACHER_INFO
+
+    def no_such_time(self, update: Update, context: CallbackContext) -> int:
+        unknown_response(update, context)
+
+        return ACTION
+
+    def time_dispatcher(self, time, update: Update, context: CallbackContext):
+        method = getattr(self, time_switcher(time))
+
+        return method(update, context)
+
+
+# Switch для TIME_SIGN ответов
+def time_switcher(time) -> str:
+    switcher = {
+        "1": "first_time",
+        "2": "second_time",
+        "3": "third_time"
+    }
+
+    return switcher.get(time, "no_such_time")
+
+
 # Функция TIME_SIGN состояния - время записи к преподавателю
 def teacher_time_func(update: Update, context: CallbackContext) -> int:
     user = update.message.from_user.full_name
     text = update.message.text
+    time = context.user_data[text]
     logger.info("<%s> chose time: \"%s\"", user, text)
     update.message.reply_text(
-        fr'Вы успешно записались к преподавателю на время {text}!'
+        fr'Вы успешно записались к преподавателю на время {time}!'
     )
     update.message.reply_text(
         "Вы хотите получить информацию о преподавателе?"
     )
 
-    return TEACHER_INFO
+    # Вызов TIME_SIGN dispatcher
+    bot_time_dispatch = TimeDispatch()
+
+    return bot_time_dispatch.time_dispatcher(text, update, context)
 
 
 # Класс функций и dispatcher состояний TEACHER_INFO
@@ -502,13 +583,26 @@ def level_language_func(update: Update, context: CallbackContext) -> int:
 
 
 # Команда /help
+def help_conversation(update: Update, context: CallbackContext) -> None:
+    """Send a message when the command /help is issued in conversation."""
+    user = update.message.from_user.full_name
+    logger.info("<%s> requested /help command in conversation.", user)
+    update.message.reply_text('Помощь:')
+    update.message.reply_text(
+        commands_text(),
+        parse_mode=telegram.ParseMode.MARKDOWN
+    )
+
+
 def help_command(update: Update, context: CallbackContext) -> None:
-    """Send a message when the command /help is issued."""
+    """Send a message when command /help is issued."""
     user = update.message.from_user.full_name
     logger.info("<%s> requested /help command.", user)
     update.message.reply_text('Помощь:')
     update.message.reply_text(
-        commands_text(),
+        '*/start* - начать разговор;\n'
+        '*/cancel* - закончить разговор;\n'
+        '*/help* - помощь.\n',
         parse_mode=telegram.ParseMode.MARKDOWN
     )
 
@@ -582,7 +676,18 @@ def unknown_response_yes_no(update: Update, context: CallbackContext) -> None:
 
 
 # Неизвестный запрос или команда при вопросе с цифрами
-def unknown_response_digit(update: Update, context: CallbackContext) -> None:
+def unknown_response_three_digit(update: Update, context: CallbackContext) -> None:
+    """Reply to enter digit"""
+    # Вызов unknown_response, затем требование цифры
+    unknown_response(update, context)
+    update.message.reply_text(
+        'Ответьте на вопрос \'*1*\', \'*2*\' или \'*3*\'',
+        parse_mode=telegram.ParseMode.MARKDOWN
+    )
+
+
+# Неизвестный запрос или команда при вопросе с цифрами
+def unknown_response_four_digit(update: Update, context: CallbackContext) -> None:
     """Reply to enter digit"""
     # Вызов unknown_response, затем требование цифры
     unknown_response(update, context)
@@ -626,7 +731,8 @@ def main() -> None:
                                action_func),
                 MessageHandler(Filters.text & ~Filters.command |
                                filter_yes | filter_no, commands_helper),
-                CommandHandler('start', already_start_func)
+                CommandHandler('start', already_start_func),
+                CommandHandler('help', help_conversation)
             ],
             RECORD: [
                 MessageHandler(Filters.voice, voice_func),
@@ -644,12 +750,14 @@ def main() -> None:
                 MessageHandler(Filters.voice, voice_func),
                 MessageHandler(filter_digit_one | filter_digit_two | filter_digit_three |
                                filter_digit_four, service_selection_func),
-                MessageHandler(Filters.text & ~Filters.command, unknown_response_digit),
+                MessageHandler(Filters.text & ~Filters.command, unknown_response_four_digit),
                 CommandHandler('start', already_start_func)
             ],
             TIME_SIGN: [
                 MessageHandler(Filters.voice, voice_func),
-                MessageHandler(Filters.text, teacher_time_func),
+                MessageHandler(filter_digit_one | filter_digit_two | filter_digit_three,
+                               teacher_time_func),
+                MessageHandler(Filters.text & ~Filters.command, unknown_response_three_digit),
                 CommandHandler('start', already_start_func)
             ],
             LEVEL_KNOWLEDGE: [
