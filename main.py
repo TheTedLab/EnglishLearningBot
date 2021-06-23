@@ -1,6 +1,5 @@
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Embedding, MaxPooling1D, Conv1D, GlobalMaxPooling1D, Dropout, LSTM, GRU
-from tensorflow.keras import utils
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.callbacks import ModelCheckpoint
@@ -8,12 +7,6 @@ from tensorflow.keras import utils
 import pandas as pd
 import numpy as np
 import random
-import time
-import telebot
-import requests
-import subprocess
-import pyttsx3
-import json
 import time
 import telebot
 import requests
@@ -49,11 +42,11 @@ train_data = "\n"
 test_data = "\n"
 
 with open("train.csv", "w") as f:
-    f.write(train_data.join(data[:1000]))
+    f.write(train_data.join(data[:200]))
 
 
 with open("test.csv", "w") as f:
-    f.write(test_data.join(data[1000:]))
+    f.write(test_data.join(data[200:]))
 
 
 train = pd.read_csv('data.txt',
@@ -71,8 +64,8 @@ seqs = tokenizer.texts_to_sequences(commands)
 x_train = pad_sequences(seqs, maxlen=10)
 
 model_lstm = Sequential()
-model_lstm.add(Embedding(10000, 64, input_length=10))
-model_lstm.add(LSTM(32))
+model_lstm.add(Embedding(1000, 32, input_length=10))
+model_lstm.add(LSTM(16))
 model_lstm.add(Dense(4, activation='softmax'))
 
 model_lstm.compile(optimizer='adam',
@@ -87,7 +80,7 @@ checkpoint_callback_lstm = ModelCheckpoint(model_lstm_save_path,
 
 history_lstm = model_lstm.fit(x_train,
                             y_train,
-                            epochs=5,
+                            epochs=1000,
                             batch_size=128,
                             validation_split=0.1,
                              callbacks=[checkpoint_callback_lstm])
