@@ -1,4 +1,3 @@
-from authorization import token
 from telegram.ext import (
     Updater,
     CommandHandler,
@@ -7,6 +6,7 @@ from telegram.ext import (
     ConversationHandler,
 )
 
+from authorization import token
 from src.bot.commands import (
     start,
     voice_func,
@@ -21,7 +21,6 @@ from src.bot.commands import (
     not_started_conversation,
     no_start_command
 )
-
 from src.bot.constants import (
     ACTION, RECORD, SERVICES, LEVEL_LANGUAGE, TIME_SIGN,
     LEVEL_KNOWLEDGE, SERVICE_SELECTION, TEACHER_INFO
@@ -31,7 +30,6 @@ from src.bot.filters import (
     filter_yes, filter_no,
     filter_digit_one, filter_digit_two, filter_digit_three, filter_digit_four
 )
-
 from src.bot.states.action import action_func
 from src.bot.states.level import level_knowledge_func, level_language_func
 from src.bot.states.record import record_with_teacher

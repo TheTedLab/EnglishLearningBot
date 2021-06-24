@@ -1,11 +1,10 @@
 import telegram
-
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from src.bot.logger import logger
 from src.bot.commands import unknown_response
 from src.bot.constants import ACTION, RECORD
+from src.bot.logger import logger
 
 
 # Класс функций и dispatcher состояний SERVICE_SELECTION

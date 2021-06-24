@@ -1,11 +1,11 @@
-import telegram
-
-from telegram import Update
-from telegram.ext import CallbackContext, ConversationHandler
 from pathlib import Path
 
-from src.bot.logger import logger
+import telegram
+from telegram import Update
+from telegram.ext import CallbackContext, ConversationHandler
+
 from src.bot.constants import hand_emoji, check_mark, cross_mark, ACTION
+from src.bot.logger import logger
 from src.conversion.opusToWav import opus_to_wav
 
 

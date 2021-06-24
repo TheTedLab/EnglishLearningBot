@@ -1,12 +1,12 @@
 import random
-import telegram
 
+import telegram
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from src.bot.logger import logger
 from src.bot.commands import unknown_response
 from src.bot.constants import right_triangle, ACTION, TIME_SIGN, LEVEL_KNOWLEDGE
+from src.bot.logger import logger
 
 
 # Класс функций и dispatcher состояний RECORD
