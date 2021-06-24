@@ -169,4 +169,6 @@ def voice_func(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(
         "Вы ввели голосовое сообщение.\nПоддержка голосовых сообщений в разработке..."
     )
-    print('Get voice message')
+    file = context.bot.getFile(voice.file_id)
+    print('Get voice message.\nfile_id: ' + str(voice.file_id))
+    file.download(custom_path='../resources/voice.ogg')
