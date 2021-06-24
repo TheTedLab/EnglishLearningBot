@@ -2,9 +2,11 @@ import telegram
 
 from telegram import Update
 from telegram.ext import CallbackContext, ConversationHandler
+from pathlib import Path
 
 from src.bot.logger import logger
 from src.bot.constants import hand_emoji, check_mark, cross_mark, ACTION
+from src.conversion.opusToWav import opus_to_wav
 
 
 # Функция стандартного текста команд
@@ -170,5 +172,18 @@ def voice_func(update: Update, context: CallbackContext) -> None:
         "Вы ввели голосовое сообщение.\nПоддержка голосовых сообщений в разработке..."
     )
     file = context.bot.getFile(voice.file_id)
-    print('Get voice message.\nfile_id: ' + str(voice.file_id))
-    file.download(custom_path='../resources/voice.ogg')
+
+    # Директория корневого каталога
+    dir_path = Path.cwd().parent
+
+    # Директории источника и результата
+    source_path = Path(dir_path, 'conversion', 'oggFiles', 'voice.ogg')
+    result_path = Path(dir_path, 'conversion', 'wavFiles', 'voice.wav')
+    # Скачиваем голосовой файл и помещаем в oggFiles
+    file.download(custom_path=source_path)
+    # Берем из oggFiles и конвертируем в wav, помещая в wavFiles
+    opus_to_wav(str(source_path), str(result_path))
+    # Открываем wav-файл и отправляем для проверки
+    with open(result_path, 'rb') as output:
+        wav_file = output.read()
+    update.message.reply_audio(wav_file, title='voice.wav')
