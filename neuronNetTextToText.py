@@ -14,11 +14,14 @@ def train_net(train_file_name: str, test_file_name: str, model_lstm_save_path: s
 
     testFileName: The name of the data file for the test with the extension .csv (Example: test.csv)
 
-    modelLstmSavePath: The name of the file to save the resulting LSTM model with the extension .h5 (Example: best_model_lstm.h5)
+    modelLstmSavePath: The name of the file to save the resulting LSTM model with the extension .h5
+    (Example: best_model_lstm.h5)
 
-    modelCnnSavePath: The name of the file to save the resulting Conv model with the extension .h5 (Example: best_model_cnn.h5)
+    modelCnnSavePath: The name of the file to save the resulting Conv model with the extension .h5
+    (Example: best_model_cnn.h5)
 
-    modelGruSavePath: The name of the file to save the resulting GRU model with the extension .h5 (Example: best_model_gru.h5)
+    modelGruSavePath: The name of the file to save the resulting GRU model with the extension .h5
+    (Example: best_model_gru.h5)
 
     numWords: Maximum number of words (Std value: 10000)
 
@@ -60,8 +63,8 @@ def train_net(train_file_name: str, test_file_name: str, model_lstm_save_path: s
     model_lstm.add(Dense(nb_classes, activation='softmax'))
 
     model_lstm.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+                       loss='categorical_crossentropy',
+                       metrics=['accuracy'])
 
     checkpoint_callback_lstm = ModelCheckpoint(model_lstm_save_path,
                                                monitor='val_accuracy',
