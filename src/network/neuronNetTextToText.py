@@ -5,36 +5,25 @@ from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.layers import Dense, Embedding, Conv1D, GlobalMaxPooling1D, LSTM, GRU
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.preprocessing.sequence import pad_sequences
-from tensorflow.keras.preprocessing.text import Tokenizer
+
+from src.network.tokenizer import text, tokenizer, train
 
 
 def train_net(train_file_name: str, test_file_name: str, model_lstm_save_path: str, model_cnn_save_path: str,
               model_gru_save_path: str, num_words: int, max_text_len: int, nb_classes: int):
     """ trainFileName: The name of the training data file with the extension .csv (Example: train.csv)
-
     testFileName: The name of the data file for the test with the extension .csv (Example: test.csv)
-
     modelLstmSavePath: The name of the file to save the resulting LSTM model with the extension .h5
     (Example: best_model_lstm.h5)
-
     modelCnnSavePath: The name of the file to save the resulting Conv model with the extension .h5
     (Example: best_model_cnn.h5)
-
     modelGruSavePath: The name of the file to save the resulting GRU model with the extension .h5
     (Example: best_model_gru.h5)
-
     numWords: Maximum number of words (Std value: 10000)
-
     maxTextLen: Maximum text length (Std value: 20)
-
     nbClasses: Number of text classes (Std value: 4)
         """
 
-    train = pd.read_csv(train_file_name,
-                        header=None,
-                        names=['class', 'text'])
-
-    text = train['text']
     print(text[:5])
     print('---------------------------')
 
@@ -42,8 +31,6 @@ def train_net(train_file_name: str, test_file_name: str, model_lstm_save_path: s
     print(y_train)
     print('---------------------------')
 
-    tokenizer = Tokenizer(num_words=num_words)
-    tokenizer.fit_on_texts(text)
     print(tokenizer.word_index)
     print('---------------------------')
 

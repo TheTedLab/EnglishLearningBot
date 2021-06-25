@@ -7,6 +7,7 @@ from telegram.ext import CallbackContext, ConversationHandler
 from src.bot.constants import hand_emoji, check_mark, cross_mark, ACTION
 from src.bot.logger import logger
 from src.conversion.opusToWav import opus_to_wav
+from src.speech_recognition.speech_recognition import voice_processing
 
 
 # Функция стандартного текста команд
@@ -168,9 +169,6 @@ def voice_func(update: Update, context: CallbackContext) -> None:
     voice = update.message.voice
     logger.info("<%s> entered voice message. Duration: %s, Size: %s",
                 user, voice.duration, voice.file_size)
-    update.message.reply_text(
-        "Вы ввели голосовое сообщение.\nПоддержка голосовых сообщений в разработке..."
-    )
     file = context.bot.getFile(voice.file_id)
 
     # Директория корневого каталога
@@ -183,7 +181,5 @@ def voice_func(update: Update, context: CallbackContext) -> None:
     file.download(custom_path=source_path)
     # Берем из oggFiles и конвертируем в wav, помещая в wavFiles
     opus_to_wav(str(source_path), str(result_path))
-    # Открываем wav-файл и отправляем для проверки
-    with open(result_path, 'rb') as output:
-        wav_file = output.read()
-    update.message.reply_audio(wav_file, title='voice.wav')
+    # Отправляем в нейросеть для распознавания речи
+    voice_processing(update, context, str(result_path))

@@ -6,7 +6,7 @@ from telegram.ext import (
     ConversationHandler,
 )
 
-from authorization import token
+from src.bot.authorization import token
 from src.bot.commands import (
     start,
     voice_func,
