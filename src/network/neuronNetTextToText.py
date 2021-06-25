@@ -38,20 +38,20 @@ def init_gru(num_words: int, max_text_len: int, nb_classes: int):
 
 def train_model(model_save_path: str, model, x_train, y_train):
     model.compile(optimizer='adam',
-                      loss='categorical_crossentropy',
-                      metrics=['accuracy'])
+                  loss='categorical_crossentropy',
+                  metrics=['accuracy'])
 
     checkpoint_callback = ModelCheckpoint(model_save_path,
-                                              monitor='val_accuracy',
-                                              save_best_only=True,
-                                              verbose=1)
+                                          monitor='val_loss',
+                                          save_best_only=True,
+                                          verbose=1)
 
     history = model.fit(x_train,
-                                y_train,
-                                epochs=500,
-                                batch_size=128,
-                                validation_split=0.1,
-                                callbacks=[checkpoint_callback])
+                        y_train,
+                        epochs=500,
+                        batch_size=128,
+                        validation_split=0.1,
+                        callbacks=[checkpoint_callback])
 
     plt.plot(history.history['accuracy'],
              label='Доля верных ответов на обучающем наборе')
@@ -68,8 +68,9 @@ def evaluate_model(model, model_save_path, x_test, y_test):
     return model.evaluate(x_test, y_test, verbose=1)
 
 
-def train_net(train_file_name: str, test_file_name: str, model_lstm_save_path: str, model_cnn_save_path: str,
-              model_gru_save_path: str, num_words: int, max_text_len: int, nb_classes: int):
+def train_net(dataset_name: str, model_lstm_save_path: str, model_cnn_save_path: str,
+              model_gru_save_path: str, final_model_save_path: str, tokenizer_save_path:str,
+              num_words: int, max_text_len: int, nb_classes: int):
     """ trainFileName: The name of the training data file with the extension .csv (Example: train.csv)
 
     testFileName: The name of the data file for the test with the extension .csv (Example: test.csv)
@@ -90,9 +91,9 @@ def train_net(train_file_name: str, test_file_name: str, model_lstm_save_path: s
     nbClasses: Number of text classes (Std value: 4)
         """
 
-    datasetRandDivision.divide_dataset()
+    datasetRandDivision.divide_dataset(dataset_name)
 
-    train = pd.read_csv(train_file_name,
+    train = pd.read_csv('train.csv',
                         header=None,
                         names=['class', 'text'])
 
@@ -137,13 +138,13 @@ def train_net(train_file_name: str, test_file_name: str, model_lstm_save_path: s
     test_sequences = tokenizer.texts_to_sequences(test['text'])
     x_test = pad_sequences(test_sequences, maxlen=max_text_len)
 
-    y_test = utils.to_categorical(test['class'] - 1, 4)
+    y_test = utils.to_categorical(test['class'] - 1, nb_classes)
 
     evaluate_model(model_lstm, model_lstm_save_path, x_test, y_test)
     evaluate_model(model_cnn, model_cnn_save_path, x_test, y_test)
     evaluate_model(model_gru, model_gru_save_path, x_test, y_test)
 
-    model_gru.save('model_gru')
+    model_gru.save(final_model_save_path)
 
-    with open('tokenizer.pickle', 'wb') as f:
+    with open(tokenizer_save_path, 'wb') as f:
         pickle.dump(tokenizer, f, protocol=pickle.HIGHEST_PROTOCOL)

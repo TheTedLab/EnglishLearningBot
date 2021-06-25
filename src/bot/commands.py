@@ -6,6 +6,7 @@ from src.bot.constants import hand_emoji, check_mark, cross_mark, ACTION
 from src.bot.logger import logger
 
 
+
 # Функция стандартного текста команд
 def commands_text() -> str:
     return 'Что ты хочешь сделать?\n' \

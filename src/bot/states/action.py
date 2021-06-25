@@ -50,7 +50,7 @@ class ActionFunctions:
         return LEVEL_LANGUAGE
 
     def no_such_action(self, update: Update, context: CallbackContext) -> int:
-        unknown_response(update, context)
+       # unknown_response(update, context)
 
         return ACTION
 
@@ -154,6 +154,7 @@ def voice_func(update: Update, context: CallbackContext) -> int:
     sequence = tokenizer.texts_to_sequences([text])
     data = pad_sequences(sequence, maxlen=10)
     result = model.predict(data)
+    print(result)
     i = np.argmax(result)
     bot_action_functions = ActionFunctions()
     text = voice_actions_switcher(i)
