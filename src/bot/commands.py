@@ -1,13 +1,9 @@
-from pathlib import Path
-
 import telegram
 from telegram import Update
 from telegram.ext import CallbackContext, ConversationHandler
 
 from src.bot.constants import hand_emoji, check_mark, cross_mark, ACTION
 from src.bot.logger import logger
-from src.conversion.opusToWav import opus_to_wav
-from src.speech_recognition.speech_recognition import voice_processing
 
 
 # Функция стандартного текста команд
@@ -158,28 +154,3 @@ def unknown_response_four_digit(update: Update, context: CallbackContext) -> Non
         parse_mode=telegram.ParseMode.MARKDOWN
     )
 
-
-# Обработка голосовых сообщений - Доработка:
-# 1. Посылает в голосовой преобразователь -> Далее в нейросеть
-# 2. Принимает из нейросети -> Прогон по фильтрам
-# 3. Возвращает боту
-def voice_func(update: Update, context: CallbackContext) -> None:
-    """Reply that received a voice message."""
-    user = update.message.from_user.full_name
-    voice = update.message.voice
-    logger.info("<%s> entered voice message. Duration: %s, Size: %s",
-                user, voice.duration, voice.file_size)
-    file = context.bot.getFile(voice.file_id)
-
-    # Директория корневого каталога
-    dir_path = Path.cwd().parent
-
-    # Директории источника и результата
-    source_path = Path(dir_path, 'conversion', 'oggFiles', 'voice.ogg')
-    result_path = Path(dir_path, 'conversion', 'wavFiles', 'voice.wav')
-    # Скачиваем голосовой файл и помещаем в oggFiles
-    file.download(custom_path=source_path)
-    # Берем из oggFiles и конвертируем в wav, помещая в wavFiles
-    opus_to_wav(str(source_path), str(result_path))
-    # Отправляем в нейросеть для распознавания речи
-    voice_processing(update, context, str(result_path))
