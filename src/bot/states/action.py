@@ -15,6 +15,9 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 import tensorflow.keras.models
 import numpy as np
 
+from src.network.training.models.neural_models import model_gru
+from src.network.training.tokenizers.tokenizers import tokenizer
+
 
 # Класс функций и dispatcher состояний ACTION
 class ActionFunctions:
@@ -50,7 +53,7 @@ class ActionFunctions:
         return LEVEL_LANGUAGE
 
     def no_such_action(self, update: Update, context: CallbackContext) -> int:
-       # unknown_response(update, context)
+        unknown_response(update, context)
 
         return ACTION
 
@@ -91,13 +94,16 @@ def recognize_speech(audio):
     headers = {'authorization': 'Bearer ' + wit_access_token,
                'Content-Type': 'audio/wav'}
 
+    logger.info('start POST request')
     # making an HTTP post request
     resp = requests.post(API_ENDPOINT, headers=headers,
                          data=audio)
 
+    logger.info('start json load')
     # converting response content to JSON format
     data = json.loads(resp.content)
 
+    # print(data)
     # get text from data
     text = data['text']
 
@@ -123,13 +129,8 @@ def voice_actions_switcher(action) -> str:
 def voice_func(update: Update, context: CallbackContext) -> int:
     """Reply that received a voice message."""
     user = update.message.from_user.full_name
-    voice = update.message.voice
-    logger.info("<%s> entered voice message. Duration: %s, Size: %s",
-                user, voice.duration, voice.file_size)
-    update.message.reply_text(
-        "Вы ввели голосовое сообщение.\nПоддержка голосовых сообщений в разработке..."
-    )
-    file = context.bot.getFile(voice.file_id)
+    logger.info("<%s> entered voice message.", user)
+    file = context.bot.getFile(update.message.voice.file_id)
 
     # Директория корневого каталога
     dir_path = Path.cwd().parent
@@ -137,26 +138,28 @@ def voice_func(update: Update, context: CallbackContext) -> int:
     # Директории источника и результата
     source_path = Path(dir_path, 'conversion', 'oggFiles', 'voice.ogg')
     result_path = Path(dir_path, 'conversion', 'wavFiles', 'voice.wav')
+    logger.info('start download')
     # Скачиваем голосовой файл и помещаем в oggFiles
     file.download(custom_path=source_path)
+    logger.info('start conversion')
     # Берем из oggFiles и конвертируем в wav, помещая в wavFiles
     opus_to_wav(str(source_path), str(result_path))
-    # Открываем wav-файл и отправляем для проверки
-    with open(result_path, 'rb') as output:
-        wav_file = output.read()
 
-    text = recognize_speech(wav_file)
+    logger.info('start open with read')
+    with open(result_path, 'rb') as voice_file:
+        voice_data = voice_file.read()
+
+    logger.info('start recognizing')
+    text = recognize_speech(voice_data)
+    logger.info('speech recognized')
     print(text)
 
-    with open('../network/tokenizer.pickle', 'rb') as f:
-        tokenizer = pickle.load(f)
-    model = tensorflow.keras.models.load_model('../network/model_gru')
     sequence = tokenizer.texts_to_sequences([text])
     data = pad_sequences(sequence, maxlen=10)
-    result = model.predict(data)
-    print(result)
+    result = model_gru.predict(data)
     i = np.argmax(result)
     bot_action_functions = ActionFunctions()
     text = voice_actions_switcher(i)
+    logger.info('speech chosed')
 
     return bot_action_functions.actions_dispatcher(text, update, context)

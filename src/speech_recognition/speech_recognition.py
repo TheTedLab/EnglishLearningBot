@@ -8,8 +8,8 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 from src.bot.authorization import wit_access_token
 from src.bot.constants import API_ENDPOINT
-from src.network.neural_models import model_gru
-from src.network.tokenizer import tokenizer
+from src.network.training.models.neural_models import model_gru
+from src.network.training.tokenizers.tokenizers import tokenizer
 from src.speech_recognition.tts import tts
 
 

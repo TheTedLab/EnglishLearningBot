@@ -7,3 +7,13 @@ right_triangle = u'\U000025B6'
 # Перечисление состояний разговора
 ACTION, RECORD, TIME_SIGN, INFO, SERVICES, SERVICE_SELECTION, LEVEL_KNOWLEDGE, \
     LEVEL_LANGUAGE, TEACHER_INFO = range(9)
+
+# Константы распознавания речи
+API_ENDPOINT = 'https://api.wit.ai/speech'
+RU_VOICE_ID = r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_RU-RU_IRINA_11.0"
+
+# Пути к файлам нейронных сетей для бота
+lstm_path = '../network/training/training_files/best_model_lstm.h5'
+cnn_path = '../network/training/training_files/best_model_cnn.h5'
+final_path = '../network/training/models/model_gru'
+tokenizer_path = '../network/training/tokenizers/tokenizer.pickle'

@@ -6,7 +6,7 @@ from telegram.ext import (
     ConversationHandler,
 )
 
-#from authorization import token
+from authorization import token
 from src.bot.commands import (
     start,
     commands_helper,
@@ -38,9 +38,6 @@ from src.bot.states.service_selection import service_selection_func
 from src.bot.states.services import services_func
 from src.bot.states.teacher_info import teacher_info_func
 from src.bot.states.time_sign import teacher_time_func
-
-
-token = TG_API = '1889784597:AAH9muA6PWCt4eGxEVeJn9KTSLRi_EVkJpQ'
 
 
 def main() -> None:
