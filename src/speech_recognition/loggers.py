@@ -22,7 +22,7 @@ critical_distance = 0.1
 
 def save_in_log(command: str, percents: np.ndarray, commands_dict: dict):
     message = 'Command: ' + command + '; Predictions: ' + percents + \
-              '; Result' + commands_dict.get(np.argmax(percents), 'не понял')
+              '; Result: ' + commands_dict.get(np.argmax(percents), 'incorrect')
     info_logger.info(message)
 
     percents = percents[0, :]
