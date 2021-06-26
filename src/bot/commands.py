@@ -155,3 +155,15 @@ def unknown_response_four_digit(update: Update, context: CallbackContext) -> Non
         parse_mode=telegram.ParseMode.MARKDOWN
     )
 
+
+# Любые запросы и команды внутри области без поддрежки голосовых
+def voice_not_yet_support(update: Update, context: CallbackContext) -> None:
+    """Reply to enter text."""
+    # Вызов unknown_response, затем требование команды /start
+    unknown_response(update, context)
+    update.message.reply_text(
+        'В этой области голосовые сообщения пока не поддерживаются.'
+    )
+    update.message.reply_text(
+        'Попробуйте текстовые сообщения!'
+    )

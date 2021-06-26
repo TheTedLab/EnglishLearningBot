@@ -2,15 +2,12 @@ import json
 
 import numpy as np
 import requests
-from telegram import Update
-from telegram.ext import CallbackContext
+from keras_preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 from src.bot.authorization import wit_access_token
 from src.bot.constants import API_ENDPOINT
-from src.network.training.models.neural_models import model_gru
-from src.network.training.tokenizers.tokenizers import tokenizer
-from src.speech_recognition.tts import tts
+# from src.speech_recognition.tts import tts
 
 
 def recognize_speech(audio):
@@ -35,44 +32,22 @@ def recognize_speech(audio):
 
 
 # Обработка голосового сообщения
-def voice_processing(update: Update, context: CallbackContext,
-                     result_path: str):
+def voice_processing(result_path: str, tokenizer: Tokenizer, net_model) -> np.ndarray:
     with open(result_path, 'rb') as voice_file:
-        voice = voice_file.read()
+        voice_data = voice_file.read()
 
-    text = recognize_speech(voice)
-    update.message.reply_text(
-        'Бот услышал: ' + text
-    )
+    text = recognize_speech(voice_data)
     print('bot heard: ' + text)
 
-    command = text
-    sequence = tokenizer.texts_to_sequences([command])
-    text_data = pad_sequences(sequence, maxlen=10)
-    result = model_gru.predict(text_data)
-    update.message.reply_text(
-        'Проценты: \n'
-        '| Запись | Подробнее | Услуги | Уровень |\n' +
-        str(result)
-    )
-    print(result)
+    sequence = tokenizer.texts_to_sequences([text])
+    data = pad_sequences(sequence, maxlen=10)
+    result = net_model.predict(data)
 
-    i = np.argmax(result)
+    return np.argmax(result)
 
-    commands_dict = {
-        0: 'записываю на занятие',
-        1: 'говорю подробнее',
-        2: 'показываю услуги',
-        3: 'проверяю твой уровень'
-    }
-
-    update.message.reply_text(
-        'Бот выбрал: ' + commands_dict.get(i, 'не понял')
-    )
-    print('bot choose to answer: ' + commands_dict.get(i, 'не понял'))
-
-    tts.save_to_file(commands_dict.get(i, 'не понял'), '../resources/answer.ogg')
-    tts.runAndWait()
+    # Оставил на будущее, если будем делать ответы
+    # tts.save_to_file(commands_dict.get(i, 'не понял'), '../resources/answer.ogg')
+    # tts.runAndWait()
     # time.sleep(0.3)
-    answer = open('../resources/answer.ogg', 'rb')
-    update.message.reply_voice(answer)
+    # answer = open('../resources/answer.ogg', 'rb')
+    # update.message.reply_voice(answer)
