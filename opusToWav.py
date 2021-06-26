@@ -1,7 +1,0 @@
-import subprocess
-
-
-def opus_to_wav(source_file: str, result_file: str):
-    options = '--force-wav'
-    cmd = 'opusdec.exe ' + options + ' ' + source_file + ' ' + result_file
-    subprocess.run(cmd)
