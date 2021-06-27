@@ -158,6 +158,7 @@ def voice_func(update: Update, context: CallbackContext) -> int:
     data = pad_sequences(sequence, maxlen=10)
     result = model_gru.predict(data)
     i = np.argmax(result)
+    print(result)
     bot_action_functions = ActionFunctions()
     text = voice_actions_switcher(i)
     logger.info('speech chosed')
