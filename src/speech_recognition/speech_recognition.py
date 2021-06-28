@@ -11,7 +11,7 @@ from src.bot.constants import API_ENDPOINT
 from src.network.neural_models import model_gru
 from src.network.tokenizer import tokenizer
 from src.speech_recognition.tts import tts
-from src.speech_recognition.loggers import save_in_log
+from src.logs.loggers import save_in_log
 
 
 def recognize_speech(audio):
