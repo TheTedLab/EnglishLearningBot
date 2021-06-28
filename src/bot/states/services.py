@@ -1,7 +1,7 @@
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from src.bot.commands import unknown_response
+from src.bot.commands import unknown_response, voice_yes_no
 from src.bot.constants import ACTION, SERVICE_SELECTION
 from src.bot.logger import logger
 
@@ -44,6 +44,17 @@ def services_func(update: Update, context: CallbackContext) -> int:
     user = update.message.from_user.full_name
     text = update.message.text
     logger.info("<%s> chose to get services info: \"%s\"", user, text)
+    # Вызов SERVICES dispatcher
+    bot_services_info = ServicesDispatch()
+
+    return bot_services_info.services_dispatcher(text, update, context)
+
+
+# Обработка голосовых сообщений SERVICES состояния
+def voice_services_yes_no(update: Update, context: CallbackContext) -> int:
+    user = update.message.from_user.full_name
+    text = voice_yes_no(update, context)
+    logger.info("<%s> chose to get services info: \"%s\" (voice)", user, text)
     # Вызов SERVICES dispatcher
     bot_services_info = ServicesDispatch()
 

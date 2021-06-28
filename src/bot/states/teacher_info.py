@@ -1,7 +1,7 @@
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from src.bot.commands import unknown_response
+from src.bot.commands import unknown_response, voice_yes_no
 from src.bot.constants import ACTION
 from src.bot.logger import logger
 
@@ -44,6 +44,17 @@ def teacher_info_func(update: Update, context: CallbackContext) -> int:
     user = update.message.from_user.full_name
     text = update.message.text
     logger.info("<%s> chose to get information about the teacher: %s", user, text)
+    # Вызов TEACHER_INFO dispatcher
+    bot_teacher_info = TeacherInfoDispatch()
+
+    return bot_teacher_info.teacher_info_dispatcher(text, update, context)
+
+
+# Обработка голосовых сообщений TEACHER_INFO состояния
+def voice_teacher_info_yes_no(update: Update, context: CallbackContext) -> int:
+    user = update.message.from_user.full_name
+    text = voice_yes_no(update, context)
+    logger.info("<%s> chose to get information about the teacher: %s (voice)", user, text)
     # Вызов TEACHER_INFO dispatcher
     bot_teacher_info = TeacherInfoDispatch()
 

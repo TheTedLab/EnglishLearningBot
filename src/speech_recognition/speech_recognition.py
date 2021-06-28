@@ -3,13 +3,40 @@ import json
 import numpy as np
 import requests
 from keras_preprocessing.text import Tokenizer
+from pathlib import Path
+from telegram import Update
+from telegram.ext import CallbackContext
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 from src.bot.authorization import wit_access_token
 from src.bot.constants import API_ENDPOINT
+from src.conversion.opusToWav import opus_to_wav
+
+
 # from src.speech_recognition.tts import tts
 
+# Предобработка голосового сообщения: скачивание и конвертация
+def voice_pre_processing(update: Update, context: CallbackContext) -> str:
+    # Получаем голосовой файл из Telegram
+    file = context.bot.getFile(update.message.voice.file_id)
 
+    # Директория корневого каталога
+    dir_path = Path.cwd().parent
+
+    # Директории источника и результата
+    source_path = str(Path(dir_path, 'conversion', 'oggFiles', 'voice.ogg'))
+    result_path = str(Path(dir_path, 'conversion', 'wavFiles', 'voice.wav'))
+
+    # Скачиваем голосовой файл и помещаем в oggFiles
+    file.download(custom_path=source_path)
+
+    # Берем из oggFiles и конвертируем в wav, помещая в wavFiles
+    opus_to_wav(source_path, result_path)
+
+    return result_path
+
+
+# Распознавание речи с помощью WIT AI API
 def recognize_speech(audio):
     # defining headers for HTTP request
     headers = {
