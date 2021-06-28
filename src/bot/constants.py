@@ -13,7 +13,7 @@ API_ENDPOINT = 'https://api.wit.ai/speech'
 RU_VOICE_ID = r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_RU-RU_IRINA_11.0"
 
 # Пути к файлам нейронных сетей для бота
-lstm_path = '../network/training/training_files/best_model_services_lstm.h5'
-cnn_path = '../network/training/training_files/best_model_services_cnn.h5'
-final_path = '../network/training/models/model_gru_services'
-tokenizer_path = '../network/training/tokenizers/tokenizer_services.pickle'
+lstm_path = '../network/training/training_files/best_model_lstm.h5'
+cnn_path = '../network/training/training_files/best_model_cnn.h5'
+final_path = '../network/training/models/model_gru'
+tokenizer_path = '../network/training/tokenizers/tokenizer.pickle'

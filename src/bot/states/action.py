@@ -157,8 +157,12 @@ def voice_func(update: Update, context: CallbackContext) -> int:
     sequence = tokenizer.texts_to_sequences([text])
     data = pad_sequences(sequence, maxlen=10)
     result = model_gru.predict(data)
-    i = np.argmax(result)
+    if np.max(result) > 0.6:
+        i = np.argmax(result)
+    else:
+        i = 4
     print(result)
+    print(np.argmax(result))
     bot_action_functions = ActionFunctions()
     text = voice_actions_switcher(i)
     logger.info('speech chosed')
