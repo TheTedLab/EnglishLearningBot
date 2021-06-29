@@ -5,6 +5,10 @@ from telegram.ext import CallbackContext, ConversationHandler
 from src.bot.constants import hand_emoji, check_mark, cross_mark, ACTION
 from src.bot.logger import logger
 
+from src.network.training.models.neural_models import model_gru_yn
+from src.network.training.tokenizers.tokenizers import tokenizer_yn
+from src.speech_recognition.speech_recognition import voice_processing, voice_pre_processing
+
 
 # Функция стандартного текста команд
 def commands_text() -> str:
@@ -154,3 +158,45 @@ def unknown_response_four_digit(update: Update, context: CallbackContext) -> Non
         parse_mode=telegram.ParseMode.MARKDOWN
     )
 
+
+def voice_yes_no_switcher(choice) -> str:
+    switcher = {
+        0: "Да",
+        1: "Нет"
+    }
+
+    return switcher.get(choice, "Не понял")
+
+
+# Запрос Да/Нет в любой подкатегории
+def voice_yes_no(update: Update, context: CallbackContext) -> str:
+    """Reply that received a yes/no voice message."""
+    # Получаем пользователя
+    user = update.message.from_user.full_name
+    logger.info("<%s> was asked a question with yes or no answer.", user)
+
+    # Отправляем на предобработку
+    result_path = voice_pre_processing(update, context)
+
+    # Отправляем на обработку в нейросеть
+    i = voice_processing(result_path, tokenizer_yn, model_gru_yn)
+    print(i)
+
+    # Сопоставляем числовой ответ с текстовым
+    text = voice_yes_no_switcher(i)
+    print('bot choose to answer: ' + text)
+
+    return text
+
+
+# Любые запросы и команды внутри области без поддрежки голосовых
+def voice_not_yet_support(update: Update, context: CallbackContext) -> None:
+    """Reply to enter text."""
+    # Вызов unknown_response, затем требование команды /start
+    unknown_response(update, context)
+    update.message.reply_text(
+        'В этой области голосовые сообщения пока не поддерживаются.'
+    )
+    update.message.reply_text(
+        'Попробуйте текстовые сообщения!'
+    )

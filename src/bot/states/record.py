@@ -4,7 +4,7 @@ import telegram
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from src.bot.commands import unknown_response
+from src.bot.commands import unknown_response, voice_yes_no
 from src.bot.constants import right_triangle, ACTION, TIME_SIGN, LEVEL_KNOWLEDGE
 from src.bot.logger import logger
 
@@ -72,7 +72,9 @@ def record_with_teacher(update: Update, context: CallbackContext) -> int:
     return bot_record_functions.record_dispatcher(text, update, context)
 
 
+# Генерация рандомного часа
 def random_hour(begin, end) -> str:
+    """Generates random hour from begin time to end"""
     str_hour = ""
     hour = random.randint(begin, end)
     if hour < 10:
@@ -81,3 +83,14 @@ def random_hour(begin, end) -> str:
     str_hour += str(hour) + ":00"
 
     return str_hour
+
+
+# Обработка голосовых сообщений RECORD состояния
+def voice_record_yes_no(update: Update, context: CallbackContext) -> int:
+    user = update.message.from_user.full_name
+    text = voice_yes_no(update, context)
+    logger.info("<%s> chose to record with teacher: \"%s\" (voice)", user, text)
+    # Вызов RECORD dispatcher
+    bot_record_functions = RecordFunctions()
+
+    return bot_record_functions.record_dispatcher(text, update, context)

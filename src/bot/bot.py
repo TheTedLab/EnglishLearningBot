@@ -18,7 +18,8 @@ from src.bot.commands import (
     cancel,
     help_command,
     not_started_conversation,
-    no_start_command
+    no_start_command,
+    voice_not_yet_support
 )
 from src.bot.constants import (
     ACTION, RECORD, SERVICES, LEVEL_LANGUAGE, TIME_SIGN,
@@ -30,13 +31,18 @@ from src.bot.filters import (
     filter_digit_one, filter_digit_two, filter_digit_three, filter_digit_four
 )
 from src.bot.states.action import (
-    action_func, voice_func
+    action_func, action_voice_func
 )
-from src.bot.states.level import level_knowledge_func, level_language_func
-from src.bot.states.record import record_with_teacher
+from src.bot.states.level import (
+    level_knowledge_func,
+    level_language_func,
+    voice_level_knowledge_yes_no,
+    voice_level_language_yes_no
+)
+from src.bot.states.record import record_with_teacher, voice_record_yes_no
 from src.bot.states.service_selection import service_selection_func
-from src.bot.states.services import services_func
-from src.bot.states.teacher_info import teacher_info_func
+from src.bot.states.services import services_func, voice_services_yes_no
+from src.bot.states.teacher_info import teacher_info_func, voice_teacher_info_yes_no
 from src.bot.states.time_sign import teacher_time_func
 
 
@@ -53,7 +59,7 @@ def main() -> None:
         entry_points=[CommandHandler('start', start)],
         states={
             ACTION: [
-                MessageHandler(Filters.voice, voice_func),
+                MessageHandler(Filters.voice, action_voice_func),
                 MessageHandler(filter_record | filter_info | filter_services | filter_level,
                                action_func),
                 MessageHandler(Filters.text & ~Filters.command |
@@ -62,45 +68,45 @@ def main() -> None:
                 CommandHandler('help', help_conversation)
             ],
             RECORD: [
-                MessageHandler(Filters.voice, voice_func),
+                MessageHandler(Filters.voice, voice_record_yes_no),
                 MessageHandler(filter_yes | filter_no, record_with_teacher),
                 MessageHandler(Filters.text & ~Filters.command, unknown_response_yes_no),
                 CommandHandler('start', already_start_func)
             ],
             SERVICES: [
-                MessageHandler(Filters.voice, voice_func),
+                MessageHandler(Filters.voice, voice_services_yes_no),
                 MessageHandler(filter_yes | filter_no, services_func),
                 MessageHandler(Filters.text & ~Filters.command, unknown_response_yes_no),
                 CommandHandler('start', already_start_func)
             ],
             SERVICE_SELECTION: [
-                MessageHandler(Filters.voice, voice_func),
+                MessageHandler(Filters.voice, voice_not_yet_support),
                 MessageHandler(filter_digit_one | filter_digit_two | filter_digit_three |
                                filter_digit_four, service_selection_func),
                 MessageHandler(Filters.text & ~Filters.command, unknown_response_four_digit),
                 CommandHandler('start', already_start_func)
             ],
             TIME_SIGN: [
-                MessageHandler(Filters.voice, voice_func),
+                MessageHandler(Filters.voice, voice_not_yet_support),
                 MessageHandler(filter_digit_one | filter_digit_two | filter_digit_three,
                                teacher_time_func),
                 MessageHandler(Filters.text & ~Filters.command, unknown_response_three_digit),
                 CommandHandler('start', already_start_func)
             ],
             LEVEL_KNOWLEDGE: [
-                MessageHandler(Filters.voice, voice_func),
+                MessageHandler(Filters.voice, voice_level_knowledge_yes_no),
                 MessageHandler(filter_yes | filter_no, level_knowledge_func),
                 MessageHandler(Filters.text & ~Filters.command, unknown_response_yes_no),
                 CommandHandler('start', already_start_func)
             ],
             LEVEL_LANGUAGE: [
-                MessageHandler(Filters.voice, voice_func),
+                MessageHandler(Filters.voice, voice_level_language_yes_no),
                 MessageHandler(filter_yes | filter_no, level_language_func),
                 MessageHandler(Filters.text & ~Filters.command, unknown_response_yes_no),
                 CommandHandler('start', already_start_func)
             ],
             TEACHER_INFO: [
-                MessageHandler(Filters.voice, voice_func),
+                MessageHandler(Filters.voice, voice_teacher_info_yes_no),
                 MessageHandler(filter_yes | filter_no, teacher_info_func),
                 MessageHandler(Filters.text & ~Filters.command, unknown_response_yes_no),
                 CommandHandler('start', already_start_func)
@@ -119,7 +125,7 @@ def main() -> None:
     dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, no_start_command))
 
     # Голосовое сообщение до начала разговора
-    dispatcher.add_handler(MessageHandler(Filters.voice, voice_func))
+    dispatcher.add_handler(MessageHandler(Filters.voice, no_start_command))
 
     # Старт бота
     updater.start_polling()
