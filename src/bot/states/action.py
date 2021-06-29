@@ -17,11 +17,10 @@ import numpy as np
 
 from src.network.training.models.neural_models import model_gru
 from src.network.training.tokenizers.tokenizers import tokenizer
-
-# Класс функций и dispatcher состояний ACTION
 from src.speech_recognition.speech_recognition import voice_processing, voice_pre_processing
 
 
+# Класс функций и dispatcher состояний ACTION
 class ActionFunctions:
     def record_func(self, update: Update, context: CallbackContext) -> int:
         update.message.reply_text("Вы хотите записаться к конкретному преподавателю?")

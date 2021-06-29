@@ -10,6 +10,7 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 from src.bot.authorization import wit_access_token
 from src.bot.constants import API_ENDPOINT
+from src.logs.loggers import save_in_log
 from src.conversion.opusToWav import opus_to_wav
 
 
@@ -69,6 +70,8 @@ def voice_processing(result_path: str, tokenizer: Tokenizer, net_model) -> np.nd
     sequence = tokenizer.texts_to_sequences([text])
     data = pad_sequences(sequence, maxlen=10)
     result = net_model.predict(data)
+    
+    # save_in_log(text, result, commands_dict)
 
     return np.argmax(result)
 
