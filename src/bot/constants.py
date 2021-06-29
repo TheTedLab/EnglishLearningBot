@@ -15,5 +15,7 @@ RU_VOICE_ID = r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_M
 # Пути к файлам нейронных сетей для бота
 lstm_path = '../network/training/training_files/best_model_lstm.h5'
 cnn_path = '../network/training/training_files/best_model_cnn.h5'
-final_path = '../network/training/models/model_gru'
-tokenizer_path = '../network/training/tokenizers/tokenizer.pickle'
+main_model_path = '../network/training/models/model_gru'
+yes_no_model_path = '../network/training/models/model_gru_yn'
+main_tokenizer_path = '../network/training/tokenizers/tokenizer.pickle'
+yes_no_tokenizer_path = '../network/training/tokenizers/tokenizer_yn.pickle'

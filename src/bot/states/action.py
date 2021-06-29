@@ -18,8 +18,10 @@ import numpy as np
 from src.network.training.models.neural_models import model_gru
 from src.network.training.tokenizers.tokenizers import tokenizer
 
-
 # Класс функций и dispatcher состояний ACTION
+from src.speech_recognition.speech_recognition import voice_processing, voice_pre_processing
+
+
 class ActionFunctions:
     def record_func(self, update: Update, context: CallbackContext) -> int:
         update.message.reply_text("Вы хотите записаться к конкретному преподавателю?")
@@ -85,32 +87,7 @@ def action_func(update: Update, context: CallbackContext) -> int:
     return bot_action_functions.actions_dispatcher(text, update, context)
 
 
-def recognize_speech(audio):
-    API_ENDPOINT = 'https://api.wit.ai/speech'
-
-    # Wit.ai api access token
-    wit_access_token = 'ZIJAR4WEPUZEVJHYEVZYUXLZZNZXKHQO'
-    # defining headers for HTTP request
-    headers = {'authorization': 'Bearer ' + wit_access_token,
-               'Content-Type': 'audio/wav'}
-
-    logger.info('start POST request')
-    # making an HTTP post request
-    resp = requests.post(API_ENDPOINT, headers=headers,
-                         data=audio)
-
-    logger.info('start json load')
-    # converting response content to JSON format
-    data = json.loads(resp.content)
-
-    # print(data)
-    # get text from data
-    text = data['text']
-
-    # return the text
-    return text
-
-
+# Switch для ACTION ответов нейросети
 def voice_actions_switcher(action) -> str:
     switcher = {
         0: "Запись на занятие",
@@ -122,49 +99,24 @@ def voice_actions_switcher(action) -> str:
     return switcher.get(action, "no_such_action")
 
 
-# Обработка голосовых сообщений - Доработка:
-# 1. Посылает в голосовой преобразователь -> Далее в нейросеть
-# 2. Принимает из нейросети -> Прогон по фильтрам
-# 3. Возвращает боту
-def voice_func(update: Update, context: CallbackContext) -> int:
-    """Reply that received a voice message."""
+# Обработка голосовых сообщений ACTION состояния
+def action_voice_func(update: Update, context: CallbackContext) -> int:
+    """Reply that received a action voice message."""
+    # Получаем пользователя
     user = update.message.from_user.full_name
-    logger.info("<%s> entered voice message.", user)
-    file = context.bot.getFile(update.message.voice.file_id)
+    logger.info("<%s> entered action voice message.", user)
 
-    # Директория корневого каталога
-    dir_path = Path.cwd().parent
+    # Отправляем на предобработку
+    result_path = voice_pre_processing(update, context)
 
-    # Директории источника и результата
-    source_path = Path(dir_path, 'conversion', 'oggFiles', 'voice.ogg')
-    result_path = Path(dir_path, 'conversion', 'wavFiles', 'voice.wav')
-    logger.info('start download')
-    # Скачиваем голосовой файл и помещаем в oggFiles
-    file.download(custom_path=source_path)
-    logger.info('start conversion')
-    # Берем из oggFiles и конвертируем в wav, помещая в wavFiles
-    opus_to_wav(str(source_path), str(result_path))
+    # Отправляем на обработку в нейросеть
+    i = voice_processing(result_path, tokenizer, model_gru)
 
-    logger.info('start open with read')
-    with open(result_path, 'rb') as voice_file:
-        voice_data = voice_file.read()
-
-    logger.info('start recognizing')
-    text = recognize_speech(voice_data)
-    logger.info('speech recognized')
-    print(text)
-
-    sequence = tokenizer.texts_to_sequences([text])
-    data = pad_sequences(sequence, maxlen=10)
-    result = model_gru.predict(data)
-    if np.max(result) > 0.6:
-        i = np.argmax(result)
-    else:
-        i = 4
-    print(result)
-    print(np.argmax(result))
-    bot_action_functions = ActionFunctions()
+    # Сопоставляем числовой ответ с текстовым
     text = voice_actions_switcher(i)
-    logger.info('speech chosed')
+    print('bot choose to answer: ' + text)
+
+    # Вызов ACTION dispatcher
+    bot_action_functions = ActionFunctions()
 
     return bot_action_functions.actions_dispatcher(text, update, context)

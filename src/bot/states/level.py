@@ -2,7 +2,7 @@ import telegram
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from src.bot.commands import unknown_response
+from src.bot.commands import unknown_response, voice_yes_no
 from src.bot.constants import ACTION
 from src.bot.logger import logger
 
@@ -85,6 +85,28 @@ def level_language_func(update: Update, context: CallbackContext) -> int:
     user = update.message.from_user.full_name
     text = update.message.text
     logger.info("<%s> want to know English level: \"%s\"", user, text)
+    # Вызов LEVEL_LANGUAGE dispatcher
+    bot_language_dispatch = LevelDispatch()
+
+    return bot_language_dispatch.language_dispatcher(text, update, context)
+
+
+# Обработка голосовых сообщений LEVEL_KNOWLEDGE состояния
+def voice_level_knowledge_yes_no(update: Update, context: CallbackContext) -> int:
+    user = update.message.from_user.full_name
+    text = voice_yes_no(update, context)
+    logger.info("<%s> knows English level: \"%s\" (voice)", user, text)
+    # Вызов LEVEL_KNOWLEDGE dispatcher
+    bot_knowledge_dispatch = LevelDispatch()
+
+    return bot_knowledge_dispatch.knowledge_dispatcher(text, update, context)
+
+
+# Обработка голосовых сообщений LEVEL_LANGUAGE состояния
+def voice_level_language_yes_no(update: Update, context: CallbackContext) -> int:
+    user = update.message.from_user.full_name
+    text = voice_yes_no(update, context)
+    logger.info("<%s> want to know English level: \"%s\" (voice)", user, text)
     # Вызов LEVEL_LANGUAGE dispatcher
     bot_language_dispatch = LevelDispatch()
 
