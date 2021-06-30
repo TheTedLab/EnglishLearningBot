@@ -14,7 +14,7 @@ from src.bot.commands import (
     help_conversation,
     unknown_response_yes_no,
     unknown_response_four_digit,
-    unknown_response_three_digit,
+    unknown_response_sign_hour,
     cancel,
     help_command,
     not_started_conversation,
@@ -28,7 +28,10 @@ from src.bot.constants import (
 from src.bot.filters import (
     filter_record, filter_services, filter_level, filter_info,
     filter_yes, filter_no,
-    filter_digit_one, filter_digit_two, filter_digit_three, filter_digit_four
+    filter_digit_one, filter_digit_two, filter_digit_three, filter_digit_four,
+    filter_nine_hour, filter_ten_hour, filter_eleven_hour, filter_twelve_hour,
+    filter_thirteen_hour, filter_fourteen_hour, filter_fifteen_hour,
+    filter_sixteen_hour, filter_seventeen_hour, filter_eighteen_hour
 )
 from src.bot.states.action import (
     action_func, action_voice_func
@@ -43,7 +46,7 @@ from src.bot.states.record import record_with_teacher, voice_record_yes_no
 from src.bot.states.service_selection import service_selection_func, voice_service_selection
 from src.bot.states.services import services_func, voice_services_yes_no
 from src.bot.states.teacher_info import teacher_info_func, voice_teacher_info_yes_no
-from src.bot.states.time_sign import teacher_time_func
+from src.bot.states.time_sign import teacher_time_func, voice_time_sign
 
 
 def main() -> None:
@@ -87,10 +90,13 @@ def main() -> None:
                 CommandHandler('start', already_start_func)
             ],
             TIME_SIGN: [
-                MessageHandler(Filters.voice, voice_not_yet_support),
-                MessageHandler(filter_digit_one | filter_digit_two | filter_digit_three,
+                MessageHandler(Filters.voice, voice_time_sign),
+                MessageHandler(filter_nine_hour | filter_ten_hour | filter_eleven_hour |
+                               filter_twelve_hour | filter_thirteen_hour | filter_fourteen_hour |
+                               filter_fifteen_hour | filter_sixteen_hour | filter_seventeen_hour |
+                               filter_eighteen_hour,
                                teacher_time_func),
-                MessageHandler(Filters.text & ~Filters.command, unknown_response_three_digit),
+                MessageHandler(Filters.text & ~Filters.command, unknown_response_sign_hour),
                 CommandHandler('start', already_start_func)
             ],
             LEVEL_KNOWLEDGE: [

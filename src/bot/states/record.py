@@ -12,26 +12,8 @@ from src.bot.logger import logger
 # Класс функций и dispatcher состояний RECORD
 class RecordFunctions:
     def teacher_sign_func(self, update: Update, context: CallbackContext) -> int:
-        first_time = random_hour(6, 19)
-        second_time = random_hour(7, 20)
-        third_time = random_hour(8, 21)
-
-        while second_time <= first_time:
-            second_time = random_hour(7, 20)
-
-        while third_time <= second_time:
-            third_time = random_hour(8, 21)
-
-        update.message.reply_text("На какое время? (Укажите номер)")
-        update.message.reply_text(
-            right_triangle + '1. *' + first_time + '*\n' +
-            right_triangle + '2. *' + second_time + '*\n' +
-            right_triangle + '3. *' + third_time + '*\n',
-            parse_mode=telegram.ParseMode.MARKDOWN
-        )
-        context.user_data['1'] = first_time
-        context.user_data['2'] = second_time
-        context.user_data['3'] = third_time
+        update.message.reply_text("На какое время?")
+        update.message.reply_text('Укажите любой час с 9:00 до 18:00.')
 
         return TIME_SIGN
 

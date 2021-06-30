@@ -138,12 +138,12 @@ def unknown_response_yes_no(update: Update, context: CallbackContext) -> None:
 
 
 # Неизвестный запрос или команда при вопросе с цифрами
-def unknown_response_three_digit(update: Update, context: CallbackContext) -> None:
-    """Reply to enter digit"""
+def unknown_response_sign_hour(update: Update, context: CallbackContext) -> None:
+    """Reply to enter hour in format"""
     # Вызов unknown_response, затем требование цифры
     unknown_response(update, context)
     update.message.reply_text(
-        'Ответьте на вопрос \'*1*\', \'*2*\' или \'*3*\'',
+        'Ответьте на вопрос, введя час в формате: *чч:00*',
         parse_mode=telegram.ParseMode.MARKDOWN
     )
 

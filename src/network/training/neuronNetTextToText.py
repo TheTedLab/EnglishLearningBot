@@ -92,10 +92,10 @@ def train_net(dataset_name: str, model_lstm_save_path: str, model_cnn_save_path:
                         names=['class', 'text'])
 
     text = train['text']
-    print(text[:5])
+    print(text[:375])
     print('---------------------------')
 
-    y_train = utils.to_categorical(train['class'] - 1, nb_classes)
+    y_train = utils.to_categorical(train['class'], nb_classes)
     print(y_train)
     print('---------------------------')
 
@@ -132,7 +132,7 @@ def train_net(dataset_name: str, model_lstm_save_path: str, model_cnn_save_path:
     test_sequences = tokenizer.texts_to_sequences(test['text'])
     x_test = pad_sequences(test_sequences, maxlen=max_text_len)
 
-    y_test = utils.to_categorical(test['class'] - 1, nb_classes)
+    y_test = utils.to_categorical(test['class'], nb_classes)
 
     evaluate_model(model_lstm, model_lstm_save_path, x_test, y_test)
     evaluate_model(model_cnn, model_cnn_save_path, x_test, y_test)

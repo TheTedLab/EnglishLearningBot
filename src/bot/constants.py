@@ -20,8 +20,10 @@ cnn_path = '../network/training/training_files/best_model_cnn.h5'
 main_model_path = '../network/training/models/model_gru'
 yes_no_model_path = '../network/training/models/model_gru_yn'
 services_model_path = '../network/training/models/model_gru_services'
+times_model_path = '../network/training/models/model_gru_times'
 
 # Токенайзеры
 main_tokenizer_path = '../network/training/tokenizers/tokenizer.pickle'
 yes_no_tokenizer_path = '../network/training/tokenizers/tokenizer_yn.pickle'
 services_tokenizer_path = '../network/training/tokenizers/tokenizer_services.pickle'
+times_tokenizer_path = '../network/training/tokenizers/tokenizer_times.pickle'
