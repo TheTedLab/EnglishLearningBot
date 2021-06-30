@@ -14,10 +14,10 @@ warn_file_handler = logging.FileHandler("../logs/command_recognition_warn.log", 
 warn_file_handler.setFormatter(formatter)
 
 warn_logger = logging.getLogger("command_recognition_warn")
-warn_logger.setLevel(logging.WARNING)
+warn_logger.setLevel(logging.INFO)
 warn_logger.addHandler(warn_file_handler)
 
-critical_distance = 0.1
+critical_distance = 0.97
 
 
 def save_in_log(command: str, percents: np.ndarray, choice: str):
@@ -27,12 +27,14 @@ def save_in_log(command: str, percents: np.ndarray, choice: str):
     info_logger.info(message)
 
     percents = percents[0, :]
-    first = np.argmax(percents)
-    second = 0
+    first = float(np.max(percents))
+    second = 0.0
 
     for i in range(0, np.size(percents)):
-        if int(percents.item(i)) > second & int(percents.item(i)) != first:
-            second = np.where(percents == i)
+        index_percent = float(percents.item(i))
+        if index_percent > second and index_percent != first:
+            second = index_percent
 
-    if first - second < critical_distance:
+    print('min diff: ' + str(first - second))
+    if float(first - second) < critical_distance:
         warn_logger.info(message)

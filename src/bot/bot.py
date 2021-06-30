@@ -40,7 +40,7 @@ from src.bot.states.level import (
     voice_level_language_yes_no
 )
 from src.bot.states.record import record_with_teacher, voice_record_yes_no
-from src.bot.states.service_selection import service_selection_func
+from src.bot.states.service_selection import service_selection_func, voice_service_selection
 from src.bot.states.services import services_func, voice_services_yes_no
 from src.bot.states.teacher_info import teacher_info_func, voice_teacher_info_yes_no
 from src.bot.states.time_sign import teacher_time_func
@@ -80,7 +80,7 @@ def main() -> None:
                 CommandHandler('start', already_start_func)
             ],
             SERVICE_SELECTION: [
-                MessageHandler(Filters.voice, voice_not_yet_support),
+                MessageHandler(Filters.voice, voice_service_selection),
                 MessageHandler(filter_digit_one | filter_digit_two | filter_digit_three |
                                filter_digit_four, service_selection_func),
                 MessageHandler(Filters.text & ~Filters.command, unknown_response_four_digit),
