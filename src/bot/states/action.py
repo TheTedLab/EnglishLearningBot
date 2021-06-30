@@ -109,11 +109,7 @@ def action_voice_func(update: Update, context: CallbackContext) -> int:
     result_path = voice_pre_processing(update, context)
 
     # Отправляем на обработку в нейросеть
-    i = voice_processing(result_path, tokenizer, model_gru)
-
-    # Сопоставляем числовой ответ с текстовым
-    text = voice_actions_switcher(i)
-    print('bot choose to answer: ' + text)
+    text = voice_processing(result_path, tokenizer, model_gru, voice_actions_switcher)
 
     # Вызов ACTION dispatcher
     bot_action_functions = ActionFunctions()

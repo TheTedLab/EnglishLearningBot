@@ -60,20 +60,31 @@ def recognize_speech(audio):
 
 
 # Обработка голосового сообщения
-def voice_processing(result_path: str, tokenizer: Tokenizer, net_model) -> np.ndarray:
+def voice_processing(result_path: str, tokenizer: Tokenizer, net_model, switcher) -> str:
+    # Читаем wav-файл
     with open(result_path, 'rb') as voice_file:
         voice_data = voice_file.read()
 
+    # Распознавание речи
     text = recognize_speech(voice_data)
     print('bot heard: ' + text)
 
+    # Разбиваем на токены
     sequence = tokenizer.texts_to_sequences([text])
     data = pad_sequences(sequence, maxlen=10)
-    result = net_model.predict(data)
-    
-    # save_in_log(text, result, commands_dict)
 
-    return np.argmax(result)
+    # Нейросеть предсказывает ответ
+    result = net_model.predict(data)
+    i = np.argmax(result)
+
+    # Сопоставляем числовой ответ с текстовым
+    choice_text = switcher(i)
+    print('bot choose to answer: ' + choice_text)
+
+    # Сохраняем в лог
+    save_in_log(text, result, choice_text)
+
+    return choice_text
 
     # Оставил на будущее, если будем делать ответы
     # tts.save_to_file(commands_dict.get(i, 'не понял'), '../resources/answer.ogg')

@@ -179,12 +179,7 @@ def voice_yes_no(update: Update, context: CallbackContext) -> str:
     result_path = voice_pre_processing(update, context)
 
     # Отправляем на обработку в нейросеть
-    i = voice_processing(result_path, tokenizer_yn, model_gru_yn)
-    print(i)
-
-    # Сопоставляем числовой ответ с текстовым
-    text = voice_yes_no_switcher(i)
-    print('bot choose to answer: ' + text)
+    text = voice_processing(result_path, tokenizer_yn, model_gru_yn, voice_yes_no_switcher)
 
     return text
 
