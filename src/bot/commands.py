@@ -2,9 +2,8 @@ import telegram
 from telegram import Update
 from telegram.ext import CallbackContext, ConversationHandler
 
-from src.bot.constants import hand_emoji, check_mark, cross_mark, ACTION
+from src.bot.constants import hand_emoji, check_mark, cross_mark, memo_emoji, loudspeaker, ACTION
 from src.bot.logger import logger
-
 from src.network.training.models.neural_models import model_gru_yn
 from src.network.training.tokenizers.tokenizers import tokenizer_yn
 from src.speech_recognition.speech_recognition import voice_processing, voice_pre_processing
@@ -12,11 +11,12 @@ from src.speech_recognition.speech_recognition import voice_processing, voice_pr
 
 # Функция стандартного текста команд
 def commands_text() -> str:
-    return 'Что ты хочешь сделать?\n' \
-           + check_mark + 'Напиши \"*Запись на занятие*\" - чтобы записаться на курсы к преподавателю\n' \
-           + check_mark + 'Напиши \"*Подробнее*\" - чтобы получить дополнительную информацию о платформе\n' \
-           + check_mark + 'Напиши \"*Услуги*\" - чтобы узнать об различных услугах платформы\n' \
-           + check_mark + 'Напиши \"*Узнать уровень*\" - чтобы узнать свой уровень английского языка\n'
+    return 'Что ты хочешь сделать?\n\n' \
+           'Пришли текстом' + memo_emoji + ' или голосом' + loudspeaker + ' сообщение:\n' \
+           + check_mark + '\"*Запись на занятие*\" - чтобы записаться на курсы к преподавателю\n' \
+           + check_mark + '\"*Подробнее*\" - чтобы получить дополнительную информацию о платформе\n' \
+           + check_mark + '\"*Услуги*\" - чтобы узнать об различных услугах платформы\n' \
+           + check_mark + '\"*Узнать уровень*\" - чтобы узнать свой уровень английского языка\n'
 
 
 # Функция вывода текста команд
@@ -34,9 +34,13 @@ def start(update: Update, context: CallbackContext) -> int:
     user = update.effective_user
     logger.info("<%s> start conversation.", user.full_name)
     update.message.reply_text(
-        hand_emoji + fr'Привет, {user.full_name}!' +
-        '\n Я бот школы по изучению английского языка' +
-        ' и я помогу тебе взаимодействовать с нашей платформой!\n' +
+        hand_emoji + fr'Привет, {user.full_name}!'
+    )
+    update.message.reply_text(
+        'Я бот школы по изучению английского языка' +
+        ' и я помогу тебе взаимодействовать с нашей платформой!'
+    )
+    update.message.reply_text(
         commands_text(),
         parse_mode=telegram.ParseMode.MARKDOWN
     )
@@ -98,7 +102,7 @@ def no_start_command(update: Update, context: CallbackContext) -> None:
     # Вызов unknown_response, затем требование команды /start
     unknown_response(update, context)
     update.message.reply_text(
-        'Чтобы начать разговор напишите /start.'
+        'Для начала разговора используйте команду /start'
     )
 
 
@@ -121,7 +125,7 @@ def not_started_conversation(update: Update, context: CallbackContext) -> None:
         'Разговор еще не начат!'
     )
     update.message.reply_text(
-        'Чтобы начать разговор напишите /start.'
+        'Для начала разговора используйте команду /start'
     )
 
 

@@ -1,12 +1,14 @@
+import pickle
 import matplotlib.pyplot as plt
 import pandas as pd
+
 from tensorflow.keras import utils
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.layers import Dense, Embedding, Conv1D, GlobalMaxPooling1D, LSTM, GRU
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.preprocessing.text import Tokenizer
-import pickle
+
 from src.network.training import datasetRandDivision
 
 

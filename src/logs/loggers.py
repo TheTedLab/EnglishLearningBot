@@ -3,14 +3,14 @@ import numpy as np
 
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
-info_file_handler = logging.FileHandler("../logs/command_recognition_info.log", 'w', 'utf-8')
+info_file_handler = logging.FileHandler("../logs/command_recognition_info.log", 'a', 'utf-8')
 info_file_handler.setFormatter(formatter)
 
 info_logger = logging.getLogger("command_recognition_info")
 info_logger.setLevel(logging.INFO)
 info_logger.addHandler(info_file_handler)
 
-warn_file_handler = logging.FileHandler("../logs/command_recognition_warn.log", 'w', 'utf-8')
+warn_file_handler = logging.FileHandler("../logs/command_recognition_warn.log", 'a', 'utf-8')
 warn_file_handler.setFormatter(formatter)
 
 warn_logger = logging.getLogger("command_recognition_warn")

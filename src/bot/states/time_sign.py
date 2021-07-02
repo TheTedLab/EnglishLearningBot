@@ -1,11 +1,8 @@
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from src.bot.commands import unknown_response
-from src.bot.constants import ACTION, TEACHER_INFO
+from src.bot.constants import TEACHER_INFO
 from src.bot.logger import logger
-
-
 from src.network.training.models.neural_models import model_gru_times
 from src.network.training.tokenizers.tokenizers import tokenizer_times
 from src.speech_recognition.speech_recognition import voice_pre_processing, voice_processing

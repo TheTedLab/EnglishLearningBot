@@ -18,8 +18,7 @@ from src.bot.commands import (
     cancel,
     help_command,
     not_started_conversation,
-    no_start_command,
-    voice_not_yet_support
+    no_start_command
 )
 from src.bot.constants import (
     ACTION, RECORD, SERVICES, LEVEL_LANGUAGE, TIME_SIGN,

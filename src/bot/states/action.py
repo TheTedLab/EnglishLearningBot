@@ -1,20 +1,9 @@
-from pathlib import Path
 from telegram import Update
 from telegram.ext import CallbackContext
 
 from src.bot.commands import unknown_response
 from src.bot.constants import right_triangle, ACTION, RECORD, SERVICES, LEVEL_LANGUAGE
 from src.bot.logger import logger
-
-from src.conversion.opusToWav import opus_to_wav
-
-import requests
-import json
-import pickle
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-import tensorflow.keras.models
-import numpy as np
-
 from src.network.training.models.neural_models import model_gru
 from src.network.training.tokenizers.tokenizers import tokenizer
 from src.speech_recognition.speech_recognition import voice_processing, voice_pre_processing

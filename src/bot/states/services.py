@@ -9,7 +9,7 @@ from src.bot.logger import logger
 # Класс функций и dispatcher состояний SERVICES
 class ServicesDispatch:
     def services_info(self, update: Update, context: CallbackContext) -> int:
-        update.message.reply_text("Какой? (Укажите номер)")
+        update.message.reply_text("Какой? (Укажите номер или скажите голосом)")
 
         return SERVICE_SELECTION
 

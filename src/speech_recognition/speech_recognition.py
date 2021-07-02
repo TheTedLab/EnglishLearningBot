@@ -1,17 +1,17 @@
 import json
+from pathlib import Path
 
 import numpy as np
 import requests
 from keras_preprocessing.text import Tokenizer
-from pathlib import Path
 from telegram import Update
 from telegram.ext import CallbackContext
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 from src.bot.authorization import wit_access_token
 from src.bot.constants import API_ENDPOINT
-from src.logs.loggers import save_in_log
 from src.conversion.opusToWav import opus_to_wav
+from src.logs.loggers import save_in_log
 
 
 # from src.speech_recognition.tts import tts
@@ -53,7 +53,10 @@ def recognize_speech(audio):
     voice_data = json.loads(resp.content)
 
     # get text from data
-    text = voice_data['text']
+    if 'text' in voice_data:
+        text = voice_data['text']
+    else:
+        text = 'empty'
 
     # return the text
     return text
@@ -68,6 +71,9 @@ def voice_processing(result_path: str, tokenizer: Tokenizer, net_model, switcher
     # Распознавание речи
     text = recognize_speech(voice_data)
     print('bot heard: ' + text)
+
+    if text == 'empty':
+        return 'no_message'
 
     # Разбиваем на токены
     sequence = tokenizer.texts_to_sequences([text])

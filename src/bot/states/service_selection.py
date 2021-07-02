@@ -5,13 +5,12 @@ from telegram.ext import CallbackContext
 from src.bot.commands import unknown_response
 from src.bot.constants import ACTION, RECORD
 from src.bot.logger import logger
-
-# Класс функций и dispatcher состояний SERVICE_SELECTION
 from src.network.training.models.neural_models import model_gru_services
 from src.network.training.tokenizers.tokenizers import tokenizer_services
 from src.speech_recognition.speech_recognition import voice_pre_processing, voice_processing
 
 
+# Класс функций и dispatcher состояний SERVICE_SELECTION
 class ServiceSelection:
     def first_service(self, update: Update, context: CallbackContext) -> int:
         update.message.reply_text(

@@ -3,6 +3,8 @@ hand_emoji = u'\U0001F44B'
 check_mark = u'\U00002705'
 cross_mark = u'\U0000274C'
 right_triangle = u'\U000025B6'
+memo_emoji = u'\U0001F4DD'
+loudspeaker = u'\U0001F4E2'
 
 # Перечисление состояний разговора
 ACTION, RECORD, TIME_SIGN, INFO, SERVICES, SERVICE_SELECTION, LEVEL_KNOWLEDGE, \
