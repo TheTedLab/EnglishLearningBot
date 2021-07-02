@@ -1,4 +1,5 @@
 import logging
+
 import numpy as np
 
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -22,7 +23,11 @@ critical_distance = 0.97
 
 def save_in_log(command: str, percents: np.ndarray, choice: str):
     message = 'Command: ' + command + '; Result: ' \
-              + choice + '; Predictions: ' + str(percents)
+              + choice + ';\nPredictions: [['
+    for i in range(percents.size):
+        message += " %.9f" % percents.item(i)
+
+    message += ']]'
 
     info_logger.info(message)
 

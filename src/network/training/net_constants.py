@@ -9,4 +9,4 @@ train_file_name = '../training/sources/train.csv'
 test_file_name = '../training/sources/test.csv'
 num_words = 10000
 max_text_len = 20
-nb_classes = 3
+nb_classes = 6
