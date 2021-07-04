@@ -82,6 +82,7 @@ def voice_processing(result_path: str, tokenizer: Tokenizer, net_model, switcher
     # Нейросеть предсказывает ответ
     result = net_model.predict(data)
     i = np.argmax(result)
+    print(result)
 
     # Сопоставляем числовой ответ с текстовым
     choice_text = switcher(i)

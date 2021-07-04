@@ -5,7 +5,7 @@ def divide_dataset(dataset: str):
     with open(dataset, "r") as f:
         data = f.read().split('\n')
 
-    # random.shuffle(data)
+    #random.shuffle(data)
 
     train_data = "\n"
     test_data = "\n"
@@ -14,7 +14,7 @@ def divide_dataset(dataset: str):
     # print(boarder)
 
     with open("sources/train.csv", "w") as f:
-        f.write(train_data.join(data[:750]))
+        f.write(train_data.join(data[:50000]))
 
     with open("sources/test.csv", "w") as f:
-        f.write(test_data.join(data[750:]))
+        f.write(test_data.join(data[50000:]))

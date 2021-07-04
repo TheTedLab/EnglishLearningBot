@@ -50,7 +50,7 @@ def train_model(model_save_path: str, model, x_train, y_train):
 
     history = model.fit(x_train,
                         y_train,
-                        epochs=500,
+                        epochs=10,
                         batch_size=128,
                         validation_split=0.1,
                         callbacks=[checkpoint_callback])
@@ -97,7 +97,7 @@ def train_net(dataset_name: str, model_lstm_save_path: str, model_cnn_save_path:
     print(text[:750])
     print('---------------------------')
 
-    y_train = utils.to_categorical(train['class'], nb_classes)
+    y_train = utils.to_categorical(train['class'] - 1, nb_classes)
     print(y_train)
     print('---------------------------')
 
@@ -117,11 +117,11 @@ def train_net(dataset_name: str, model_lstm_save_path: str, model_cnn_save_path:
     print('---------------------------')
 
     model_lstm = init_lstm(num_words, max_text_len, nb_classes)
-    train_model(model_lstm_save_path, model_lstm, x_train, y_train)
+    #train_model(model_lstm_save_path, model_lstm, x_train, y_train)
 
     print("\n\nConv\n")
     model_cnn = init_cnn(num_words, max_text_len, nb_classes)
-    train_model(model_cnn_save_path, model_cnn, x_train, y_train)
+   # train_model(model_cnn_save_path, model_cnn, x_train, y_train)
 
     print("\n\nGRU\n")
     model_gru = init_gru(num_words, max_text_len, nb_classes)
@@ -134,10 +134,10 @@ def train_net(dataset_name: str, model_lstm_save_path: str, model_cnn_save_path:
     test_sequences = tokenizer.texts_to_sequences(test['text'])
     x_test = pad_sequences(test_sequences, maxlen=max_text_len)
 
-    y_test = utils.to_categorical(test['class'], nb_classes)
+    y_test = utils.to_categorical(test['class'] - 1, nb_classes)
 
-    evaluate_model(model_lstm, model_lstm_save_path, x_test, y_test)
-    evaluate_model(model_cnn, model_cnn_save_path, x_test, y_test)
+    #evaluate_model(model_lstm, model_lstm_save_path, x_test, y_test)
+    #evaluate_model(model_cnn, model_cnn_save_path, x_test, y_test)
     evaluate_model(model_gru, model_gru_save_path, x_test, y_test)
 
     model_gru.save(final_model_save_path)
