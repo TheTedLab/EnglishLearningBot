@@ -30,7 +30,7 @@ from src.bot.filters import (
     filter_digit_one, filter_digit_two, filter_digit_three, filter_digit_four,
     filter_nine_hour, filter_ten_hour, filter_eleven_hour, filter_twelve_hour,
     filter_thirteen_hour, filter_fourteen_hour, filter_fifteen_hour,
-    filter_sixteen_hour, filter_seventeen_hour, filter_eighteen_hour
+    filter_sixteen_hour, filter_seventeen_hour
 )
 from src.bot.states.action import (
     action_func, action_voice_func
@@ -92,8 +92,7 @@ def main() -> None:
                 MessageHandler(Filters.voice, voice_time_sign),
                 MessageHandler(filter_nine_hour | filter_ten_hour | filter_eleven_hour |
                                filter_twelve_hour | filter_thirteen_hour | filter_fourteen_hour |
-                               filter_fifteen_hour | filter_sixteen_hour | filter_seventeen_hour |
-                               filter_eighteen_hour,
+                               filter_fifteen_hour | filter_sixteen_hour | filter_seventeen_hour,
                                teacher_time_func),
                 MessageHandler(Filters.text & ~Filters.command, unknown_response_sign_hour),
                 CommandHandler('start', already_start_func)

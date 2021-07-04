@@ -94,7 +94,7 @@ def train_net(dataset_name: str, model_lstm_save_path: str, model_cnn_save_path:
                         names=['class', 'text'])
 
     text = train['text']
-    print(text[:750])
+    print(text[:2700])
     print('---------------------------')
 
     y_train = utils.to_categorical(train['class'], nb_classes)
