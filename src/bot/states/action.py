@@ -1,9 +1,12 @@
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from src.bot.logger import logger
 from src.bot.commands import unknown_response
 from src.bot.constants import right_triangle, ACTION, RECORD, SERVICES, LEVEL_LANGUAGE
+from src.bot.logger import logger
+from src.network.training.models.neural_models import model_gru
+from src.network.training.tokenizers.tokenizers import tokenizer
+from src.speech_recognition.speech_recognition import voice_processing, voice_pre_processing
 
 
 # Класс функций и dispatcher состояний ACTION
@@ -66,6 +69,37 @@ def action_func(update: Update, context: CallbackContext) -> int:
     user = update.message.from_user.full_name
     text = update.message.text
     logger.info("<%s> chose action: \"%s\"", user, text)
+    # Вызов ACTION dispatcher
+    bot_action_functions = ActionFunctions()
+
+    return bot_action_functions.actions_dispatcher(text, update, context)
+
+
+# Switch для ACTION ответов нейросети
+def voice_actions_switcher(action) -> str:
+    switcher = {
+        0: "Запись на занятие",
+        1: "Подробнее",
+        2: "Услуги",
+        3: "Узнать уровень"
+    }
+
+    return switcher.get(action, "no_such_action")
+
+
+# Обработка голосовых сообщений ACTION состояния
+def action_voice_func(update: Update, context: CallbackContext) -> int:
+    """Reply that received a action voice message."""
+    # Получаем пользователя
+    user = update.message.from_user.full_name
+    logger.info("<%s> entered action voice message.", user)
+
+    # Отправляем на предобработку
+    result_path = voice_pre_processing(update, context)
+
+    # Отправляем на обработку в нейросеть
+    text = voice_processing(result_path, tokenizer, model_gru, voice_actions_switcher)
+
     # Вызов ACTION dispatcher
     bot_action_functions = ActionFunctions()
 

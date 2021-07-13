@@ -1,37 +1,18 @@
 import random
-import telegram
 
 from telegram import Update
 from telegram.ext import CallbackContext
 
+from src.bot.commands import unknown_response, voice_yes_no
+from src.bot.constants import ACTION, TIME_SIGN, LEVEL_KNOWLEDGE
 from src.bot.logger import logger
-from src.bot.commands import unknown_response
-from src.bot.constants import right_triangle, ACTION, TIME_SIGN, LEVEL_KNOWLEDGE
 
 
 # Класс функций и dispatcher состояний RECORD
 class RecordFunctions:
     def teacher_sign_func(self, update: Update, context: CallbackContext) -> int:
-        first_time = random_hour(6, 19)
-        second_time = random_hour(7, 20)
-        third_time = random_hour(8, 21)
-
-        while second_time <= first_time:
-            second_time = random_hour(7, 20)
-
-        while third_time <= second_time:
-            third_time = random_hour(8, 21)
-
-        update.message.reply_text("На какое время? (Укажите номер)")
-        update.message.reply_text(
-            right_triangle + '1. *' + first_time + '*\n' +
-            right_triangle + '2. *' + second_time + '*\n' +
-            right_triangle + '3. *' + third_time + '*\n',
-            parse_mode=telegram.ParseMode.MARKDOWN
-        )
-        context.user_data['1'] = first_time
-        context.user_data['2'] = second_time
-        context.user_data['3'] = third_time
+        update.message.reply_text("На какое время?")
+        update.message.reply_text('Укажите любой час с 9:00 до 17:00.')
 
         return TIME_SIGN
 
@@ -72,7 +53,9 @@ def record_with_teacher(update: Update, context: CallbackContext) -> int:
     return bot_record_functions.record_dispatcher(text, update, context)
 
 
+# Генерация рандомного часа
 def random_hour(begin, end) -> str:
+    """Generates random hour from begin time to end"""
     str_hour = ""
     hour = random.randint(begin, end)
     if hour < 10:
@@ -81,3 +64,14 @@ def random_hour(begin, end) -> str:
     str_hour += str(hour) + ":00"
 
     return str_hour
+
+
+# Обработка голосовых сообщений RECORD состояния
+def voice_record_yes_no(update: Update, context: CallbackContext) -> int:
+    user = update.message.from_user.full_name
+    text = voice_yes_no(update, context)
+    logger.info("<%s> chose to record with teacher: \"%s\" (voice)", user, text)
+    # Вызов RECORD dispatcher
+    bot_record_functions = RecordFunctions()
+
+    return bot_record_functions.record_dispatcher(text, update, context)
