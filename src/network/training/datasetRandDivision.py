@@ -15,7 +15,7 @@ def divide_dataset(dataset: str):
     # print(boarder)
 
     with open("sources/train.csv", "w") as f:
-        f.write(train_data.join(data[:nb_classes * 10000]))
+        f.write(train_data.join(data[:nb_classes * 300]))
 
     with open("sources/test.csv", "w") as f:
-        f.write(test_data.join(data[nb_classes * 10000:]))
+        f.write(test_data.join(data[nb_classes * 300:]))

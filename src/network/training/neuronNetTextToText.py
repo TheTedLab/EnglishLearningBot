@@ -50,7 +50,7 @@ def train_model(model_save_path: str, model, x_train, y_train):
 
     history = model.fit(x_train,
                         y_train,
-                        epochs=10,
+                        epochs=500,
                         batch_size=128,
                         validation_split=0.1,
                         callbacks=[checkpoint_callback])
@@ -94,10 +94,10 @@ def train_net(dataset_name: str, model_lstm_save_path: str, model_cnn_save_path:
                         names=['class', 'text'])
 
     text = train['text']
-    print(text[:50000])
+    print(text[:2700])
     print('---------------------------')
 
-    y_train = utils.to_categorical(train['class'] - 1, nb_classes)
+    y_train = utils.to_categorical(train['class'], nb_classes)
     print(y_train)
     print('---------------------------')
 
@@ -134,7 +134,7 @@ def train_net(dataset_name: str, model_lstm_save_path: str, model_cnn_save_path:
     test_sequences = tokenizer.texts_to_sequences(test['text'])
     x_test = pad_sequences(test_sequences, maxlen=max_text_len)
 
-    y_test = utils.to_categorical(test['class'] - 1, nb_classes)
+    y_test = utils.to_categorical(test['class'], nb_classes)
 
     # evaluate_model(model_lstm, model_lstm_save_path, x_test, y_test)
     # evaluate_model(model_cnn, model_cnn_save_path, x_test, y_test)
