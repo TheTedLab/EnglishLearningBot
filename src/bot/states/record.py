@@ -12,7 +12,7 @@ from src.bot.logger import logger
 class RecordFunctions:
     def teacher_sign_func(self, update: Update, context: CallbackContext) -> int:
         update.message.reply_text("На какое время?")
-        update.message.reply_text('Укажите любой час с 9:00 до 18:00.')
+        update.message.reply_text('Укажите любой час с 9:00 до 17:00.')
 
         return TIME_SIGN
 

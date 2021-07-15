@@ -106,12 +106,6 @@ class FilterSeventeenHour(MessageFilter):
             return '17:00' in message.text
 
 
-class FilterEighteenHour(MessageFilter):
-    def filter(self, message):
-        if message.text == '18:00':
-            return '18:00' in message.text
-
-
 # Фильтры главного меню
 filter_record = FilterRecord()
 filter_info = FilterInfo()
@@ -138,4 +132,3 @@ filter_fourteen_hour = FilterFourteenHour()
 filter_fifteen_hour = FilterFifteenHour()
 filter_sixteen_hour = FilterSixteenHour()
 filter_seventeen_hour = FilterSeventeenHour()
-filter_eighteen_hour = FilterEighteenHour()
